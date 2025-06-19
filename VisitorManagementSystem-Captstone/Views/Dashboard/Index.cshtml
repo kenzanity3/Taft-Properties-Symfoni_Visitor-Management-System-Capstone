@@ -1,0 +1,216 @@
+﻿@using Microsoft.AspNetCore.Http
+
+@model IEnumerable<VisitorManagementSystem_Captstone.Models.User>
+
+@{
+    ViewData["Title"] = "Bookings Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<main class="container-fluid px-5" style="margin-top: 40px;">
+    <h1 class="text-center mb-4" style="color: #FF8C00;">Bookings Dashboard</h1>
+
+    <div class="row g-4 mb-5">
+        <!-- Total Visitors Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card" style="background: linear-gradient(135deg, #FFF3E0, #FFE0B2);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="icon-circle" style="background-color: #FFA000;">
+                        <i class="fas fa-users fa-lg" style="color: white;"></i>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-secondary">Total Visitors</h6>
+                        <h3 style="color: #E65100;">@ViewBag.VisitorCount</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checked-In Today Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card" style="background: linear-gradient(135deg, #FFF8E1, #FFECB3);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="icon-circle" style="background-color: #FFC107;">
+                        <i class="fas fa-check-circle fa-lg" style="color: white;"></i>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-secondary">Checked-In Today</h6>
+                        <h3 style="color: #FF8F00;">@ViewBag.CheckedInToday</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Approvals Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card" style="background: linear-gradient(135deg, #FFF3E0, #FFCC80);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="icon-circle" style="background-color: #FB8C00;">
+                        <i class="fas fa-clock fa-lg" style="color: white;"></i>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-secondary">Pending Approvals</h6>
+                        <h3 style="color: #EF6C00;">@ViewBag.PendingApprovals</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Visits Card -->
+        <div class="col-xl-3 col-md-6">
+            <div class="dashboard-card" style="background: linear-gradient(135deg, #FFE0B2, #FFB74D);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div class="icon-circle" style="background-color: #F57C00;">
+                        <i class="fas fa-user-clock fa-lg" style="color: white;"></i>
+                    </div>
+                    <div class="text-end">
+                        <h6 class="text-secondary">Active Visits</h6>
+                        <h3 style="color: #E65100;">@ViewBag.ActiveVisits</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="table-responsive shadow-lg rounded p-4" style="background-color: #FFF8E1;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="m-0" style="color: #FF8C00;">Visitor Records</h2>
+            <button class="btn" style="background-color: #FFA000; color: white;">
+                <i class="fas fa-plus me-2"></i>Add New Visitor
+            </button>
+        </div>
+        
+        <table id="visitorTable" class="table table-bordered table-hover align-middle text-center">
+            <thead class="table-header" style="background-color: #FFA000; color: white;">
+                <tr>
+                    <th>Visitor Name</th>
+                    <th>Host</th>
+                    <th>Check-In Time</th>
+                    <th>Check-Out Time</th>
+                    <th>Purpose</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+           @*      @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Visitor.FirstName @item.Visitor.LastName</td>
+                        <td>@item.Booking.</td>
+                        <td>@item.Booking.User.LastName</td>
+                        <td>@item.CheckInTime?.ToString("hh:mm tt")</td>
+                        <td>@item.CheckOutTime?.ToString("hh:mm tt")</td>
+                        <td>Business Meeting</td>
+                        <td>
+                            @if (item.isCheckedIn)
+                            {
+                                <span class='badge px-3 py-2' style="background-color: #4CAF50;">Checked-in</span>
+                            }
+                            else if (item.CheckOutTime.HasValue)
+                            {
+                                <span class='badge px-3 py-2' style="background-color: #9E9E9E;">Completed</span>
+                            }
+                            else
+                            {
+                                <span class='badge px-3 py-2' style="background-color: #FFC107;">Pending</span>
+                            }
+                        </td>
+                        <td>
+                            <button class="btn btn-sm" style="background-color: #FFC107; color: white;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm" style="background-color: #FF5722; color: white;">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                } *@
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<style>
+    body {
+        background-color: #FFFDE7;
+    }
+
+    .dashboard-card {
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .icon-circle {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        border-radius: 12px;
+        font-weight: 500;
+    }
+
+    .table-responsive {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    #visitorTable tbody tr:nth-child(even) {
+        background-color: rgba(255, 243, 224, 0.5);
+    }
+
+    #visitorTable tbody tr:hover {
+        background-color: rgba(255, 204, 128, 0.3);
+    }
+
+    .btn {
+        border-radius: 8px;
+        padding: 8px 16px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<!-- DataTable Script -->
+<script>
+    $(document).ready(function () {
+        $('#visitorTable').DataTable({
+            paging: true,
+            searching: true,
+            ordering: true,
+            info: true,
+            responsive: true,
+            language: {
+                paginate: {
+                    previous: "<i class='fas fa-chevron-left'></i>",
+                    next: "<i class='fas fa-chevron-right'></i>"
+                },
+                search: "_INPUT_",
+                searchPlaceholder: "Search visitors..."
+            },
+            dom: '<"top"f>rt<"bottom"lip><"clear">'
+        });
+    });
+</script>
