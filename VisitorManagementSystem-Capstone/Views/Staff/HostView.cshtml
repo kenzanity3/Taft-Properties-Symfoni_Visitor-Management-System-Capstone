@@ -1,0 +1,106 @@
+﻿@{
+    ViewBag.Title = "Host List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    body {
+        background-color: #f9fafa;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1A2C4E;
+        margin-bottom: 30px;
+    }
+
+    .card-modern {
+        background-color: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        border: none;
+    }
+
+        .card-modern .card-header {
+            background-color: #f4f6f8;
+            color: #2c3e50;
+            font-weight: 600;
+            border-radius: 14px 14px 0 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+    .table thead {
+        background-color: #f1f3f5;
+        color: #2c3e50;
+    }
+
+    .host-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        margin-right: 10px;
+        object-fit: cover;
+    }
+
+    .host-name {
+        display: flex;
+        align-items: center;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <h2 class="page-title">👥 Hosts per Unit</h2>
+
+    <div class="card card-modern">
+        <div class="card-header">
+            Host Details
+        </div>
+        <div class="card-body">
+            <table class="table table-hover table-striped">
+                <thead>
+                    <tr>
+                        <th>Unit No.</th>
+                        <th>Host Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Registered Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Unit 101</td>
+                        <td class="host-name">
+                            <img src="https://randomuser.me/api/portraits/men/32.jpg" class="host-avatar" />
+                            John Doe
+                        </td>
+                        <td>john.doe@example.com</td>
+                        <td>0917-123-4567</td>
+                        <td>2024-12-01</td>
+                    </tr>
+                    <tr>
+                        <td>Unit 203</td>
+                        <td class="host-name">
+                            <img src="https://randomuser.me/api/portraits/women/41.jpg" class="host-avatar" />
+                            Jane Smith
+                        </td>
+                        <td>jane.smith@example.com</td>
+                        <td>0920-987-6543</td>
+                        <td>2024-11-15</td>
+                    </tr>
+                    <tr>
+                        <td>Unit 305</td>
+                        <td class="host-name">
+                            <img src="https://randomuser.me/api/portraits/men/55.jpg" class="host-avatar" />
+                            Mark Lee
+                        </td>
+                        <td>mark.lee@example.com</td>
+                        <td>0918-555-6677</td>
+                        <td>2025-01-10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

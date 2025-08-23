@@ -1,0 +1,279 @@
+﻿@{
+    // Extract current controller and action from route data for menu highlighting
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString().ToLower() ?? "";
+    var action = ViewContext.RouteData.Values["action"]?.ToString().ToLower() ?? "";
+
+    // Get the current user's role from session (admin, staff, owner, visitor)
+    var role = (Context.Session.GetString("accountType") ?? "").ToLower();
+
+    // Determine if the sidebar should be hidden (e.g., on login page)
+    var hideSidebar = controller == "authentication" && action == "login";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Page Meta and Title -->
+    <meta charset="utf-8" />
+    <title>@ViewBag.Title - Visitor Facility Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Bootstrap 5 and Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Global Styles -->
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f1ed;
+        }
+
+        .wrapper {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            width: 260px;
+            background-color: #1A2C4E;
+            color: #fff;
+            padding: 30px 15px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+            .sidebar .logo {
+                font-size: 1.1rem;
+                font-weight: bold;
+                margin-bottom: 30px;
+                display: flex;
+                align-items: center;
+                color: #fff;
+            }
+
+                .sidebar .logo img {
+                    height: 40px;
+                    width: 40px;
+                    margin-right: 10px;
+                }
+
+            /* Sidebar links and dropdown buttons */
+            .sidebar a,
+            .sidebar .dropdown-btn {
+                display: block;
+                padding: 10px 15px;
+                margin-bottom: 10px;
+                color: #ffffffd9;
+                background: transparent;
+                border: none;
+                width: 100%;
+                text-align: left;
+                border-radius: 8px;
+                transition: background 0.3s;
+                text-decoration: none;
+            }
+
+                .sidebar a:hover,
+                .sidebar .dropdown-btn:hover {
+                    background-color: #324c72;
+                    color: #fff !important;
+                }
+
+                .sidebar a.active {
+                    background-color: #324c72;
+                    color: #fff !important;
+                }
+
+                .sidebar a i,
+                .sidebar .dropdown-btn i {
+                    margin-right: 8px;
+                }
+
+        /* Dropdown submenu items */
+        .dropdown-container {
+            display: none;
+            padding-left: 20px;
+        }
+
+        .dropdown-container {
+            padding-left: 20px;
+            display: none; /* initially hidden unless script shows it */
+        }
+
+        /* Main content section */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            flex: 1;
+            background-color: #f8f9fa;
+        }
+
+        /* Footer style */
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    @if (!hideSidebar)
+    {
+        <div class="wrapper">
+            <div class="sidebar">
+                <div class="logo">
+                    <img src="~/lib/logo.png" alt="Logo" />
+                    <span>Symfoni Nichols<br />Condominium</span>
+                </div>
+
+                @if (role == "admin")
+                {
+                    <a href="/Admin/DashboardAdmin" class="@(controller == "admin" && action == "dashboardadmin" ? "active" : "")"><i class="fas fa-chart-line"></i> Dashboard</a>
+                    <!-- User Management Dropdown -->
+                    <button class="dropdown-btn"><i class="fas fa-users-cog"></i> User Management <i class="fas fa-caret-down float-end"></i></button>
+                    <div class="dropdown-container">
+                        <a href="/UserManagement/UserManagement" class="@(controller == "usermanagement" && action == "usermanagement" ? "active" : "")"><i class="fas fa-user-gear"></i> Add User </a>
+                        <a href="/UserManagement/AssignAdmin" class="@(action == "assignadmin" ? "active" : "")"><i class="fas fa-user-cog"></i> Assign Admin</a>
+                    </div>
+                    <!-- Visitor Management Dropdown -->
+                    <button class="dropdown-btn"><i class="fas fa-users-cog"></i> Visitor Management <i class="fas fa-caret-down float-end"></i></button>
+                    <div class="dropdown-container">
+                        <a href="/VisitorManagement/VisitorManagement" class="@(controller == "visitormanagement" && action == "visitormanagement" ? "active" : "")">
+                            <i class="fas fa-user"></i> Visitor Management
+                        </a>
+                        <a href="/RequestVisitorApproval/RequestVisitorApproval" class="@(controller == "requestvisitorapproval" && action == "requestvisitorapproval" ? "active" : "")">
+                            <i class="fas fa-user-plus"></i> Register and Request Approval Visitor
+                        </a>
+
+                        <a href="/VisitorManagement/AppointmentList" class="@(controller == "visitormanagement" && action == "appointmentlist" ? "active" : "")">
+                            <i class="fas fa-calendar-check"></i> Appointment List
+                        </a>
+                    </div>
+                    <!--Reports-->
+                    <button class="dropdown-btn"><i class="fas fa-file-alt"></i> Reports <i class="fas fa-caret-down float-end"></i></button>
+                    <div class="dropdown-container">
+                        <a href="/Reports/FacilityUsageReport" class="@(controller == "reports" && action == "facilityusagereport" ? "active" : "")">
+                            <i class="fas fa-file-alt"></i> Facility Reports
+                        </a>
+                        <a href="/Reports/VisitorReport" class="@(controller == "reports" && action == "visitorreport" ? "active" : "")">
+                            <i class="fas fa-file-alt"></i> Visitor Reports
+                        </a>
+                        <a href="/Reports/StaffActivityReport" class="@(controller == "reports" && action == "staffactivityreport" ? "active" : "")">
+                            <i class="fas fa-file-alt"></i> Staff Activity Reports
+                        </a>
+                    </div>
+
+                    <!-- Host Dropdown -->
+                    <button class="dropdown-btn"><i class="fas fa-home-user"></i> Host Management <i class="fas fa-caret-down float-end"></i></button>
+                    <div class="dropdown-container">
+                        <a href="/RoomOwnerManagement/RoomOwnerManagement" class="@(action == "roomownermanagement" ? "active" : "")"><i class="fas fa-user-plus"></i> Manage Hosts/RoomOwner</a>
+                    </div>
+
+                    <!-- Facility Dropdown -->
+                    <button class="dropdown-btn"><i class="fas fa-building"></i> Facility <i class="fas fa-caret-down float-end"></i></button>
+                    <div class="dropdown-container">
+                        <a href="/Facility/FacilityManagement" class="@(action == "facilitymanagement" ? "active" : "")"><i class="fas fa-plus-square"></i> Add Facility</a>
+                        <a href="/Facility/EndSession" class="@(action == "endsession" ? "active" : "")"><i class="fas fa-clock"></i> End Session</a>
+                        <a href="/Facility/FacilityGenerateQRCode" class="@(action == "facilitygenerateqrcode" ? "active" : "")">  <i class="fas fa-qrcode"></i> Generate QR Code  </a>
+                        <a href="/Facility/FacilityPass" class="@(action == "facilitypass" ? "active" : "")"><i class="fas fa-qrcode"></i> Facility Pass</a>
+                    </div>
+                }
+                else if (role == "staff")
+                {
+                    <a href="/Staff/DashboardStaff" class="@(controller == "staff" && action == "dashboardstaff" ? "active" : "")"><i class="fas fa-chart-line"></i> Dashboard</a>
+                    <!--Reports-->
+                    <button class="dropdown-btn"><i class="fas fa-file-alt"></i> Reports <i class="fas fa-caret-down float-end"></i></button>
+                    <div class="dropdown-container">
+                        <a href="/Reports/FacilityUsageReport" class="@(controller == "reports" && action == "facilityusagereport" ? "active" : "")">
+                            <i class="fas fa-file-alt"></i> Facility Reports
+                        </a>
+                        <a href="/Reports/VisitorReport" class="@(controller == "reports" && action == "visitorreport" ? "active" : "")">
+                            <i class="fas fa-file-alt"></i> Visitor Reports
+                        </a>
+                        <a href="/Reports/StaffActivityReport" class="@(controller == "reports" && action == "staffactivityreport" ? "active" : "")">
+                            <i class="fas fa-file-alt"></i> Staff Activity Reports
+                        </a>
+                    </div>
+                    <a href="/RequestVisitorApproval/RequestVisitorApproval" class="@(controller == "requestvisitorapproval" && action == "requestvisitorapproval" ? "active" : "")">
+                        <i class="fas fa-user-plus"></i> Register and Request Approval Visitor
+                    </a>
+                    <a href="/Staff/AppointmentList" class="@(action == "appointmentlist" ? "active" : "")"><i class="fas fa-calendar-check"></i> Appointments</a>
+                    <a href="/Staff/ApproveVisitors" class="@(action == "approvevisitors" ? "active" : "")"><i class="fas fa-user-check"></i> Approve Visitors</a>
+                    <a href="/Staff/HostView" class="@(action == "hostview" ? "active" : "")"><i class="fas fa-users"></i> Hosts</a>
+                    <a href="/Staff/FacilityList" class="@(action == "facilitylist" ? "active" : "")"><i class="fas fa-building"></i> Facilities</a>
+                    <a href="/Staff/EndSession" class="@(action == "endsession" ? "active" : "")"><i class="fas fa-clock"></i> End Session Log</a>
+                }
+                else if (role == "owner")
+                {
+                    <a href="/RoomOwner/DashboardUnitOwner" class="@(controller == "roomowner" && action == "dashboardunitowner" ? "active" : "")"><i class="fas fa-home"></i> Dashboard</a>
+                    <a href="/Facility/EndSession" class="@(action == "endsession" ? "active" : "")"><i class="fas fa-clock"></i> End Session</a>
+                    <a href="/Facility/FacilityGenerateQRCode" class="@(action == "facilitygenerateqrcode" ? "active" : "")">  <i class="fas fa-qrcode"></i> Generate QR Code  </a>
+                    <a href="/Facility/FacilityPass" class="@(action == "facilitypass" ? "active" : "")"><i class="fas fa-qrcode"></i> Facility Pass</a>
+                }
+
+                <!-- Logout -->
+                <a href="javascript:void(0);" class="dropdown-item text-danger" id="logoutBtn"> <i class="fas fa-sign-out-alt"></i> Logout </a>
+            </div>
+
+            <!-- Main Content Section -->
+            <div class="main-content">
+                @RenderBody()
+                <footer>&copy; @DateTime.Now.Year - Visitor Facility Management System</footer>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- For login and other pages that don't need sidebar -->
+        <div class="container mt-5">
+            @RenderBody()
+        </div>
+    }
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        // Sidebar dropdown toggle script
+         $(document).ready(function () {
+            $(".dropdown-btn").each(function () {
+                var $btn = $(this);
+                var $dropdown = $btn.next(".dropdown-container");
+
+                // Auto-open if any child is active
+                if ($dropdown.find("a.active").length > 0) {
+                    $dropdown.show(); // no animation on page load
+                } else {
+                    $dropdown.hide(); // collapse others
+                }
+
+                $btn.on("click", function () {
+                    $dropdown.stop(true, true).slideToggle(200); // animate open/close
+                });
+            });
+        });
+
+        //LogOut Confirmation
+             document.getElementById('logoutBtn')?.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Are you sure you want to logout?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, logout',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Authentication/Logout';
+                }
+            });
+        });
+
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

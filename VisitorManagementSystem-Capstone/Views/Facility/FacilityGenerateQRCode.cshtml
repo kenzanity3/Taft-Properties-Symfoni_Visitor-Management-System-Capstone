@@ -1,0 +1,77 @@
+﻿@{
+    ViewBag.Title = "Facility Generate QR";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<!--FACILITY PASS GENERATE PAGE-->
+
+<!-- Link to external stylesheet -->
+<link rel="stylesheet" href="~/css/FacilityGenerateQR.css" />
+
+<div class="facility-container">
+    <!-- Form Section -->
+    <div class="card-fb-style">
+        <h4 class="text-primary fw-bold mb-4 text-center">🏷️ Add Facility Pass</h4>
+        <form id="qrForm" onsubmit="generateQR(event)">
+            <div class="mb-3">
+                <input type="text" class="form-control" id="unit" placeholder="🏢 Unit" required />
+            </div>
+            <div class="mb-3">
+                <input type="text" class="form-control" id="visitorName" placeholder="👤 Visitor Name" required />
+            </div>
+            <div class="mb-3">
+                <input type="date" class="form-control" id="date" required />
+            </div>
+            <div class="mb-3">
+                <input type="time" class="form-control" id="time" required />
+            </div>
+
+            <label class="form-label">🏊 Choose Facility</label>
+            <div class="d-flex flex-wrap gap-2 mb-4 facility-buttons">
+                <button type="button" class="btn btn-outline-primary" onclick="selectFacility('Study Room')">Study Room</button>
+                <button type="button" class="btn btn-outline-success" onclick="selectFacility('GYM Room')">GYM Room</button>
+                <button type="button" class="btn btn-outline-info" onclick="selectFacility('Swimming Pool')">Swimming Pool</button>
+                <button type="button" class="btn btn-outline-warning" onclick="selectFacility('Basketball')">Basketball</button>
+            </div>
+
+            <input type="hidden" id="selectedFacility" value="Study Room" />
+
+            <button type="submit" class="btn btn-dark w-100">🎟️ Generate QR</button>
+        </form>
+    </div>
+
+    <!--  QR Code Preview Section -->
+    <div class="card-fb-style text-center qr-box" id="qrPreview" style="display:none;">
+        <h5 class="text-secondary mb-3">🏷️ Facility QR Code</h5>
+        <input type="text" class="form-control text-center mb-3" id="qrText" readonly />
+        <img id="qrImage" src="" alt="QR Code" style="width: 220px; height: 220px;" />
+        <div class="d-flex justify-content-between mt-4">
+            <button class="btn btn-outline-primary w-45">🕒 Time In</button>
+            <button class="btn btn-outline-secondary w-45">⏰ Time Out</button>
+        </div>
+    </div>
+</div>
+
+<!--  JavaScript for dynamic QR generation -->
+<script>
+    function selectFacility(name) {
+        document.getElementById("selectedFacility").value = name;
+    }
+
+    function generateQR(event) {
+        event.preventDefault();
+
+        const unit = document.getElementById("unit").value;
+        const name = document.getElementById("visitorName").value;
+        const date = document.getElementById("date").value;
+        const time = document.getElementById("time").value;
+        const facility = document.getElementById("selectedFacility").value;
+
+        const data = `Unit: ${unit}, Name: ${name}, Date: ${date}, Time: ${time}, Facility: ${facility}`;
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(data)}&size=220x220`;
+
+        // Display QR preview
+        document.getElementById("qrImage").src = qrUrl;
+        document.getElementById("qrText").value = data;
+        document.getElementById("qrPreview").style.display = "block";
+    }
+</script>

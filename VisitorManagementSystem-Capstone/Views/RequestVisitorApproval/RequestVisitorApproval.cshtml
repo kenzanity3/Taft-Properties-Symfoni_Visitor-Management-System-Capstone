@@ -1,0 +1,764 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.ForgotContactKioskViewModel
+@{
+    ViewBag.Title = "Visitor Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/StaffDashboard.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.css">
+<style>
+    /* Additional styles for the Request Visitor Approval page */
+    .visitor-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
+
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+    }
+
+    .stat-icon {
+        font-size: 2rem;
+        margin-right: 15px;
+    }
+
+    .stat-content h3 {
+        margin: 0;
+        font-size: 1.8rem;
+    }
+
+    .stat-content p {
+        margin: 0;
+        opacity: 0.9;
+    }
+
+    .profile-picture-preview {
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+        object-fit: cover;
+        border: 2px solid #dee2e6;
+    }
+
+    .profile-img-preview {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 10px;
+        border: 2px solid #dee2e6;
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+    }
+
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 0.875em;
+        color: #dc3545;
+    }
+
+    .visit-code {
+        font-size: 1.5rem;
+        font-weight: bold;
+        letter-spacing: 2px;
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 5px;
+        border: 1px dashed #dee2e6;
+    }
+
+    .btn-generate {
+        background: linear-gradient(45deg, #007bff, #0056b3);
+        color: white;
+        border: none;
+        padding: 12px;
+        font-weight: bold;
+    }
+
+        .btn-generate:hover {
+            background: linear-gradient(45deg, #0056b3, #004494);
+            color: white;
+        }
+
+    .card-modern {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+        .card-modern .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 10px 10px 0 0 !important;
+        }
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.75em;
+    }
+
+    .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    .word-count {
+        font-size: 0.8rem;
+        color: #6c757d;
+        text-align: right;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="dashboard-header">
+            <i class="fa-solid fa-user-plus me-2"></i> Visitor Approval Management
+        </h2>
+        <div>
+            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#visitorModal">
+                <i class="fa-solid fa-plus-circle me-2"></i> Create Visitor Request
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card bg-primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalVisitors">0</h3>
+                    <p>Total Visitors Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="checkedInVisitors">0</h3>
+                    <p>Checked In</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="pendingVisitors">0</h3>
+                    <p>Pending Approval</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="checkedOutVisitors">0</h3>
+                    <p>Checked Out</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Walk-in Visitors Table -->
+    <div class="card card-modern mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-walking me-2"></i> Today's Walk-in Visitors
+            </h5>
+            <button class="btn btn-sm btn-outline-primary" onclick="refreshVisitors()">
+                <i class="fa-solid fa-refresh"></i> Refresh
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Visitor Name</th>
+                            <th>Room No.</th>
+                            <th>Room Owner</th>
+                            <th>Status</th>
+                            <th>Check-in</th>
+                            <th>Purpose</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorsTable">
+                        @if (Model.VisitLog != null && Model.VisitLog.Any())
+                        {
+                            @foreach (var visit in Model.VisitLog)
+                            {
+                                <tr class="visitor-row" data-visitlogid="@visit.VisitLogId">
+                                    <td>
+                                        <img src="@(visit.Visitor?.ProfilePicture ?? "/images/default.png")"
+                                             class="visitor-avatar"
+                                             alt="Visitor"
+                                             onerror="this.src='/images/default.png'">
+                                    </td>
+                                    <td>@($"{visit.Visitor?.User?.FirstName} {visit.Visitor?.User?.LastName}")</td>
+                                    <td>@visit.Room?.RoomNumber</td>
+                                    <td>@($"{visit.RoomOwner?.User?.FirstName} {visit.RoomOwner?.User?.LastName}")</td>
+                                    <td>
+                                        @if (visit.VerificationStatus == true)
+                                        {
+                                            <span class="badge bg-success">Approved</span>
+                                        }
+                                        else if (visit.VerificationStatus == false)
+                                        {
+                                            <span class="badge bg-danger">Denied</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">Pending</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (visit.CheckInOut != null)
+                                        {
+                                            if (visit.CheckInOut.CheckOutDateTime == null)
+                                            {
+                                                <span class="badge bg-info">Checked In</span>
+                                                <small class="d-block">@visit.CheckInOut.CheckInDateTime.ToString("hh:mm tt")</small>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-secondary">Checked Out</span>
+                                                <small class="d-block">@visit.CheckInOut.CheckOutDateTime.Value.ToString("hh:mm tt")</small>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Not Checked In</span>
+                                        }
+                                    </td>
+                                    <td>@visit.PurposeOfVisit</td>
+                                    <td>
+                                        @if (visit.CheckInOut != null && visit.CheckInOut.CheckOutDateTime == null)
+                                        {
+                                            <button class="btn btn-sm btn-outline-danger checkout-btn"
+                                                    data-visitlogid="@visit.VisitLogId"
+                                                    data-visitorname="@($"{visit.Visitor?.User?.FirstName} {visit.Visitor?.User?.LastName}")">
+                                                <i class="fa-solid fa-door-open"></i> Check Out
+                                            </button>
+                                        }
+                                        else if (visit.CheckInOut == null && visit.VerificationStatus == true)
+                                        {
+                                            <button class="btn btn-sm btn-outline-success checkin-btn"
+                                                    data-visitlogid="@visit.VisitLogId">
+                                                <i class="fa-solid fa-door-closed"></i> Check In
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No actions</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="bi bi-people" style="font-size: 2rem;"></i>
+                                    <p class="mt-2">No walk-in visitors today</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checked Out Visitors Table -->
+    <div class="card card-modern">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-history me-2"></i> Today's Checked Out Visitors
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Visitor Name</th>
+                            <th>Room No.</th>
+                            <th>Checked In</th>
+                            <th>Checked Out</th>
+                            <th>Checked Out By</th>
+                            <th>Duration</th>
+                        </tr>
+                    </thead>
+                    <tbody id="checkedOutTable">
+                        @if (Model.VisitLog != null && Model.VisitLog.Any(v => v.CheckInOut != null && v.CheckInOut.CheckOutDateTime != null))
+                        {
+                            @foreach (var visit in Model.VisitLog.Where(v => v.CheckInOut != null && v.CheckInOut.CheckOutDateTime != null))
+                            {
+                                var duration = visit.CheckInOut.CheckOutDateTime.Value - visit.CheckInOut.CheckInDateTime;
+                                <tr>
+                                    <td>@($"{visit.Visitor?.User?.FirstName} {visit.Visitor?.User?.LastName}")</td>
+                                    <td>@visit.Room?.RoomNumber</td>
+                                    <td>@visit.CheckInOut.CheckInDateTime.ToString("hh:mm tt")</td>
+                                    <td>@visit.CheckInOut.CheckOutDateTime.Value.ToString("hh:mm tt")</td>
+                                    <td>@(visit.CheckInOut.CheckedOutBy ?? "System")</td>
+                                    <td>@($"{duration.Hours}h {duration.Minutes}m")</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-clock-history" style="font-size: 2rem;"></i>
+                                    <p class="mt-2">No visitors have checked out today</p>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Visitor Request Modal -->
+<div class="modal fade" id="visitorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Visitor Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="visitorForm" enctype="multipart/form-data">
+                    <div class="row">
+                        <!-- Left Column - Profile Picture -->
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="profile-picture-container mb-3">
+                                    <img id="profilePreview" src="/images/default.png"
+                                         class="profile-picture-preview"
+                                         alt="Profile Preview">
+                                    <div class="profile-actions mt-2">
+                                        <input type="file" id="profileUpload" accept="image/*"
+                                               class="d-none" name="ProfilePicture">
+                                        <button type="button" class="btn btn-sm btn-outline-primary me-2"
+                                                onclick="document.getElementById('profileUpload').click()">
+                                            <i class="fa-solid fa-upload"></i> Upload
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-info"
+                                                onclick="openCamera()">
+                                            <i class="fa-solid fa-camera"></i> Camera
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Form Fields -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Visitor Full Name *</label>
+                                <input type="text" class="form-control" name="VisitorFullName" required>
+                            </div>
+                            <div>
+                                <label class="form-label">Tower *</label>
+                                <select name="Tower" id="Tower" class= "form-control" required>
+                                    <option value="" selected disabled>--select--</option>
+                                    <option value="Alto">Alto</option>
+                                    <option value="Bossa">Bossa</option>
+                                </select>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Room Number *</label>
+                                        <input type="text" class="form-control" id="RoomNumber" name="RoomNumber" required>
+                                        <div class="invalid-feedback" id="roomNumberFeedback"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Room Owner Name</label>
+                                        <input type="text" class="form-control" readonly id="RoomOwnerName" name="RoomOwnerName">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Contact Number</label>
+                                <input type="tel" class="form-control" name="ContactNumber"
+                                       placeholder="Optional for visitors without contact">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Purpose of Visit *</label>
+                                <select class="form-select mb-3" id="PurposeDropdown" onchange="updatePurposeFromDropdown()" required>
+                                    <option value="">-- Select a purpose --</option>
+                                    <option value="Personal Visit">Personal Visit</option>
+                                    <option value="Delivery">Delivery</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Other">Other (specify below)</option>
+                                </select>
+
+                                <textarea class="form-control" id="PurposeOfVisit" name="PurposeOfVisit" rows="3"
+                                          maxlength="1000" placeholder="Describe your visit purpose..."
+                                          required oninput="updateWordCount(this.value.length)"></textarea>
+
+                                <div class="word-count" id="wordCount">0 / 1000 characters</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitVisitorForm()">Submit Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Take Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="cameraView" style="width: 100%; height: 300px;"></div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="capturePhoto()">
+                        <i class="fa-solid fa-camera me-2"></i> Capture
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        $(document).ready(function() {
+            // Load visitors on page load
+            refreshVisitors();
+            updateStats();
+
+               // Function to validate room number and tower
+        function validateRoom() {
+            const roomNumber = $('#RoomNumber').val();
+            const tower = $('#Tower').val();
+
+            // Reset feedback
+            $('#RoomOwnerName').val('');
+            $('#roomNumberFeedback').text('');
+            // Check if both fields are filled
+            if (roomNumber.length > 2 && tower) {
+                // Call validation if both fields are filled
+                validateRoomNumber($('#RoomNumber'), $('#RoomOwnerName'), $('#roomNumberFeedback'), $('#Tower'));
+            } else {
+                // Provide specific feedback
+                if (!tower) {
+                    $('#roomNumberFeedback').text('Please select a tower.');
+                }
+                if (roomNumber.length <= 2) {
+                    $('#roomNumberFeedback').text('Room number must be more than 2 characters.');
+                }
+            }
+        }
+
+        // Room number validation for Tower input
+        $('#Tower').on('input', function() {
+            validateRoom();
+        });
+
+        // Room number validation for RoomNumber input
+        $('#RoomNumber').on('input', function() {
+            validateRoom();
+        });
+
+
+            // Profile picture upload preview
+            $('#profileUpload').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#profilePreview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            // Check out button handler
+            $(document).on('click', '.checkout-btn', function() {
+                const visitLogId = $(this).data('visitlogid');
+                const visitorName = $(this).data('visitorname');
+
+                Swal.fire({
+                    title: 'Check Out Visitor',
+                    text: `Are you sure you want to check out ${visitorName}?`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Check Out',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        checkOutVisitor(visitLogId);
+                    }
+                });
+            });
+
+            // Check in button handler
+            $(document).on('click', '.checkin-btn', function() {
+                const visitLogId = $(this).data('visitlogid');
+                checkInVisitor(visitLogId);
+            });
+        });
+
+        function refreshVisitors() {
+            $.get('/RequestVisitorApproval/GetWalkInVisitors', function(data) {
+                $('#visitorsTable').html(data);
+                updateStats();
+            });
+        }
+
+        function updateStats() {
+            const total = $('.visitor-row').length;
+            const checkedIn = $('.badge.bg-info').length;
+            const pending = $('.badge.bg-warning').length;
+            const checkedOut = $('#checkedOutTable tr').length - 1; // Subtract header row
+
+            $('#totalVisitors').text(total);
+            $('#checkedInVisitors').text(checkedIn);
+            $('#pendingVisitors').text(pending);
+            $('#checkedOutVisitors').text(checkedOut);
+        }
+
+               function submitVisitorForm() {
+            const formData = new FormData(document.getElementById('visitorForm'));
+
+            // Log form data for debugging
+            for (let [key, value] of formData.entries()) {
+                console.log(`${key}: ${value}`);
+            }
+
+            // Validate required fields
+            if (!formData.get('VisitorFullName') || !formData.get('RoomOwnerName') || !formData.get('Tower') || !formData.get('RoomNumber') || !formData.get('PurposeOfVisit')) {
+                Swal.fire('Error', 'Please fill all required fields.', 'error');
+                return;
+            }
+
+            // Validate room number
+            if ($('#RoomNumber').hasClass('is-invalid')) {
+                Swal.fire('Error', 'Please enter a valid room number with an active owner.', 'error');
+                return;
+            }
+            console.log('123check');
+            $.ajax({
+                url: '/RequestVisitorApproval/RequestApproval',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+
+                console.log(response); // Log the full response for debugging
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message,
+                            timer: 3000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            $('#visitorModal').modal('hide');
+                            document.getElementById('visitorForm').reset();
+                            $('#profilePreview').attr('src', '/images/default.png');
+                            $('#roomOwnerName').val('');
+                            $('#wordCount').text('0 / 1000 characters');
+                            refreshVisitors();
+                        });
+                    } else {
+                        console.log('123');
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+
+        console.log(xhr); // Log the full xhr response for debugging
+                    Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                }
+            });
+        }
+
+        function checkOutVisitor(visitLogId) {
+            $.ajax({
+                url: '/RequestVisitorApproval/CheckOutVisitor',
+                type: 'POST',
+                data: { visitLogId: visitLogId },
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: response.message
+                        }).then(() => {
+                            refreshVisitors();
+                        });
+                    } else {
+                        Swal.fire('Error', response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                }
+            });
+        }
+
+        function checkInVisitor(visitLogId) {
+            // Implement check-in functionality similar to check-out
+            // This would require a corresponding backend method
+            Swal.fire('Info', 'Check-in functionality would be implemented here', 'info');
+        }
+
+        function openCamera() {
+            $('#cameraModal').modal('show');
+            Webcam.set({
+                width: 320,
+                height: 240,
+                image_format: 'jpeg',
+                jpeg_quality: 90
+            });
+            Webcam.attach('#cameraView');
+        }
+
+        function capturePhoto() {
+            Webcam.snap(function(data_uri) {
+                $('#profilePreview').attr('src', data_uri);
+                // Convert data URI to blob and create file input
+                const blob = dataURItoBlob(data_uri);
+                const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('profileUpload').files = dataTransfer.files;
+
+                $('#cameraModal').modal('hide');
+                Webcam.reset();
+            });
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+
+            return new Blob([ab], { type: mimeString });
+        }
+
+        function validateRoomNumber(inputElement, ownerNameElement, feedbackElement, towerElement) {
+            const roomNumber = inputElement.val();
+            const tower = towerElement.val(); // Get the tower value from the passed element
+
+            if (roomNumber.length > 2) {
+                $.get('/RequestVisitorApproval/GetRoomOwner', { roomNumber: roomNumber, tower: tower }, function(data) {
+                    if (data.success) {
+                        ownerNameElement.val(data.roomOwnerName);
+                        inputElement.removeClass('is-invalid');
+                        feedbackElement.text('');
+                    } else {
+                        ownerNameElement.val('Not found');
+                        inputElement.addClass('is-invalid');
+                        feedbackElement.text('Room not found or has no active owner');
+                    }
+                }).fail(function() {
+                    ownerNameElement.val('Error checking room');
+                    inputElement.addClass('is-invalid');
+                    feedbackElement.text('Error validating room number');
+                });
+            } else {
+                ownerNameElement.val('');
+                inputElement.removeClass('is-invalid');
+                feedbackElement.text('');
+            }
+        }
+
+        // Purpose of visit functions
+        function updatePurposeFromDropdown() {
+            const dropdown = document.getElementById("PurposeDropdown");
+            const textarea = document.getElementById("PurposeOfVisit");
+
+            if (dropdown.value === "Other") {
+                textarea.value = "";
+                textarea.focus();
+                textarea.dataset.userEdited = "true";
+            } else if (dropdown.value) {
+                textarea.value = dropdown.value;
+                textarea.dataset.userEdited = "";
+            }
+            updateWordCount(textarea.value.length); 
+        }
+
+        function updateWordCount(count) {
+            const wordCountElement = document.getElementById("wordCount");
+            wordCountElement.textContent = `${count} / 1000 characters`;
+
+            // Add warning class if approaching limit
+            if (count > 900) {
+                wordCountElement.classList.add('text-warning');
+                wordCountElement.classList.remove('text-danger');
+            } else if (count > 1000) {
+                wordCountElement.classList.add('text-danger');
+                wordCountElement.classList.remove('text-warning');
+            } else {
+                wordCountElement.classList.remove('text-warning', 'text-danger');
+            }
+        }
+    </script>
+}

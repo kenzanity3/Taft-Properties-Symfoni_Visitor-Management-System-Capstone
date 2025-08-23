@@ -1,0 +1,696 @@
+﻿@using VisitorManagementSystem_Capstone.ViewModels
+@model DashboardViewModel
+@{
+    ViewBag.Title = "Unit Owner Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/RoomOwnerDashboard.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="dashboard-header"><i class="fa-solid fa-house-user me-2"></i> Unit Occupant Overview Dashboard</h2>
+        <div id="codeStatusContainer" class="d-flex align-items-center" style="display:none;">
+            <div class="me-3">
+                <span class="badge bg-primary">Active Code</span>
+                <span id="expiryTimer" class="ms-2 fw-bold">25:00</span>
+            </div>
+            <button id="copyCodeBtn" class="btn btn-sm btn-primary">
+                <i class="bi bi-clipboard"></i> Copy Code
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-8">
+            <!-- Visit Code Card -->
+            <div class="card card-modern mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fa-solid fa-key me-2"></i> Generate Visit Code</h4>
+                    <div id="usageCount" class="badge bg-secondary" style="display:none;">Uses left: 5</div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Create a one-time code for your visitors to use when making appointments</p>
+
+                    <form id="generateCodeForm" asp-action="GenerateVisitCode" asp-controller="RoomOwner" method="post">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" id="generateCodeBtn" class="btn btn-generate w-100">
+                            <i class="bi bi-key me-2"></i> Generate Visit Code
+                        </button>
+                    </form>
+
+                    <div id="visitCodeDisplay" class="text-center mt-3" style="display: none;">
+                        <div class="visit-code" id="generatedCode"></div>
+                        <p class="text-muted mt-2">Share this code with your visitor</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pending Appointments -->
+            <div class="report-section mt-4">
+                <h5 class="mb-3"><i class="fa-solid fa-hourglass-half me-2 text-warning"></i> Pending Approvals</h5>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Visitor Name</th>
+                                <th>Room No.</th>
+                                <th>Status</th>
+                                <th>Created By</th>
+                                <th>Date</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pendingAppointmentsTable">
+                            @if (Model.PendingVisits != null && Model.PendingVisits.Any())
+                            {
+                                @foreach (var appt in Model.PendingVisits)
+                                {
+                                    <tr data-visitlogid="@appt.VisitLogId">
+                                        <td>@($"{appt.Visitor?.User?.FirstName} {appt.Visitor?.User?.LastName}")</td>
+                                        <td>@appt.Room?.RoomNumber</td>
+                                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                                        <td>
+                                            <span class="badge @GetCreatorBadgeClass(appt.CreatedBy)">
+                                                @GetCreatorDisplayName(appt.CreatedBy, appt.AuthorizedUser)
+                                            </span>
+                                        </td>
+                                        <td>@appt.AppointmentDate?.ToString("MMM dd, yyyy")</td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-success approve-btn" data-visitlogid="@appt.VisitLogId">
+                                                    <i class="fa-solid fa-check"></i> Approve
+                                                </button>
+                                                <button class="btn btn-danger deny-btn" data-visitlogid="@appt.VisitLogId">
+                                                    <i class="fa-solid fa-xmark"></i> Decline
+                                                </button>
+                                                <button class="btn btn-info info-visitor-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#infoVisitorModal"
+                                                        data-userid="@appt.Visitor?.UserId"
+                                                        data-fullname="@($"{appt.Visitor?.User?.FirstName} {appt.Visitor?.User?.LastName}")"
+                                                        data-contact="@(appt.Visitor?.User?.ContactNumber ?? "N/A")"
+                                                        data-profilepic="@appt.Visitor?.ProfilePicture"
+                                                        data-purposeofvisit="@appt.PurposeOfVisit">
+                                                    <i class="fa-solid fa-circle-info"></i> Details
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        <i class="bi bi-calendar-x" style="font-size: 2rem;"></i>
+                                        <p class="mt-2">No pending appointments found.</p>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Staff Approval Required -->
+            <div class="report-section mt-4">
+                <h5 class="mb-3">
+                    <i class="fa-solid fa-phone me-2 text-danger"></i>
+                    Staff Approval Required (No Contact Number)
+                </h5>
+                <div class="alert alert-warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    These visitors have no valid contact number. Staff must call the unit owner for verification.
+                    Once approved → automatic check-in to building.
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Visitor Name</th>
+                                <th>Room No.</th>
+                                <th>Status</th>
+                                <th>Created By</th>
+                                <th>Date</th>
+                                <th>Purpose</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="staffApprovalTable">
+                            @if (Model.StaffApprovalVisits != null && Model.StaffApprovalVisits.Any())
+                            {
+                                @foreach (var visit in Model.StaffApprovalVisits)
+                                {
+                                    <tr data-visitlogid="@visit.VisitLogId">
+                                        <td>@($"{visit.Visitor?.User?.FirstName} {visit.Visitor?.User?.LastName}")</td>
+                                        <td>@visit.Room?.RoomNumber</td>
+                                        <td><span class="badge bg-danger">No Contact</span></td>
+                                        <td>
+                                            <span class="badge @GetCreatorBadgeClass(visit.CreatedBy)">
+                                                @GetCreatorDisplayName(visit.CreatedBy, visit.AuthorizedUser)
+                                            </span>
+                                        </td>
+                                        <td>@visit.AppointmentDate?.ToString("MMM dd, yyyy")</td>
+                                        <td>@visit.PurposeOfVisit</td>
+                                        <td class="text-center">
+                                            <div class="btn-group btn-group-sm">
+                                                <button class="btn btn-success approve-staff-btn" data-visitlogid="@visit.VisitLogId">
+                                                    <i class="fa-solid fa-phone"></i> Call & Approve
+                                                </button>
+                                                <button class="btn btn-danger deny-staff-btn" data-visitlogid="@visit.VisitLogId">
+                                                    <i class="fa-solid fa-xmark"></i> Decline
+                                                </button>
+                                                <button class="btn btn-info info-visitor-btn"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#infoVisitorModal"
+                                                        data-userid="@visit.Visitor?.UserId"
+                                                        data-fullname="@($"{visit.Visitor?.User?.FirstName} {visit.Visitor?.User?.LastName}")"
+                                                        data-contact="@(visit.Visitor?.User?.ContactNumber ?? "N/A")"
+                                                        data-profilepic="@visit.Visitor?.ProfilePicture"
+                                                        data-purposeofvisit="@visit.PurposeOfVisit">
+                                                    <i class="fa-solid fa-circle-info"></i> Details
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="7" class="text-center text-muted py-4">
+                                        <i class="bi bi-telephone-x" style="font-size: 2rem;"></i>
+                                        <p class="mt-2">No visits requiring staff approval</p>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-4">
+            <!-- Quick Stats -->
+            <div class="card card-modern mb-4">
+                <div class="card-header">
+                    <h5><i class="fa-solid fa-chart-pie me-2"></i> Quick Stats</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Pending Approvals</span>
+                            <span class="fw-bold pending-count">@Model.PendingVisits?.Count</span>
+                        </div>
+                        <div class="progress mt-1" style="height: 6px;">
+                            <div class="progress-bar bg-warning progress-bar-pending" style="width: @(Model.PendingVisits?.Count > 0 ? "100%" : "0%")"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Approved Today</span>
+                            <span class="fw-bold approved-today">@Model.VerifiedVisits?.Count(v => v.VerificationStatus == true && v.VerifiedDateTime?.Date == DateTime.Today)</span>
+                        </div>
+                        <div class="progress mt-1" style="height: 6px;">
+                            <div class="progress-bar bg-success progress-bar-approved" style="width: @(Model.VerifiedVisits?.Count(v => v.VerificationStatus == true && v.VerifiedDateTime?.Date == DateTime.Today) > 0 ? "100%" : "0%")"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verified Appointments -->
+            <div class="card card-modern">
+                <div class="card-header">
+                    <h5><i class="fa-solid fa-check-circle me-2"></i> Verified Appointments</h5>
+                </div>
+                <div class="card-body" id="verified-appointments-container">
+                    @if (Model.VerifiedVisits != null && Model.VerifiedVisits.Any())
+                    {
+                        <div class="list-group">
+                            @foreach (var appt in Model.VerifiedVisits.Take(5))
+                            {
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between">
+                                        <div>
+                                            <strong>@($"{appt.Visitor?.User?.FirstName} {appt.Visitor?.User?.LastName}")</strong>
+                                            <button class="btn btn-sm btn-info ms-2 info-visitor-btn"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#infoVisitorModal"
+                                                    data-userid="@appt.Visitor?.UserId"
+                                                    data-fullname="@($"{appt.Visitor?.User?.FirstName} {appt.Visitor?.User?.LastName}")"
+                                                    data-contact="@(appt.Visitor?.User?.ContactNumber ?? "N/A")"
+                                                    data-profilepic="@appt.Visitor?.ProfilePicture">
+                                                <i class="bi bi-info-circle"></i>
+                                            </button>
+                                        </div>
+                                        <span class="badge @(appt.VerificationStatus == true ? "bg-success" : appt.VerificationStatus == null && appt.logStatus == false ? "bg-warning" : "bg-danger")">
+                                            @(appt.VerificationStatus == true ? "Approved" : appt.VerificationStatus == null && appt.logStatus == false ? "Expired" : "Declined")
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">@appt.AppointmentDate?.ToString("MMM dd")</small>
+                                </div>
+                            }
+                        </div>
+                        @if (Model.VerifiedVisits.Count > 5)
+                        {
+                            <div class="text-center mt-2">
+                                <small class="text-muted">+ @(Model.VerifiedVisits.Count - 5) more</small>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-center text-muted py-4">
+                            <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                            <p class="mt-2">No verified appointments</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Visitor Modal -->
+<div class="modal fade" id="infoVisitorModal" tabindex="-1" aria-labelledby="infoVisitorModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="infoVisitorModalLabel">Visitor Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex align-items-center mb-3">
+                    <img id="infoProfilePic" src="~/images/default.png" alt="Profile Picture"
+                         class="profile-img-preview me-3" style="width: 100px; height: 100px; object-fit: cover;" />
+                    <div>
+                        <h5 id="infoFullName" class="mb-0"></h5>
+                        <small id="infoUserId" class="text-muted"></small>
+                        <div class="mt-2">
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold">Contact Number:</label>
+                    <div id="infoContact" class="text-muted"></div>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label fw-bold">Purpose of Visit:</label>
+                    <div id="infoPurpose" class="text-muted"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@functions {
+    private string GetCreatorBadgeClass(string createdBy)
+    {
+        return createdBy?.ToLower() switch
+        {
+            "admin" => "bg-danger",
+            "staff" => "bg-info",
+            "visitor" => "bg-secondary",
+            _ => "bg-secondary"
+        };
+    }
+
+    private string GetCreatorDisplayName(string createdBy, User authorizedUser)
+    {
+        return createdBy?.ToLower() switch
+        {
+            "admin" => $"Admin: {authorizedUser?.FirstName} {authorizedUser?.LastName}",
+            "staff" => $"Staff: {authorizedUser?.FirstName} {authorizedUser?.LastName}",
+            "visitor" => "Visitor",
+            _ => createdBy ?? "Unknown"
+        };
+    }
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let countdownInterval;
+            let usageCount = 5;
+
+            // Check for existing active OTP on page load
+            checkExistingOtp();
+
+        // Update the checkExistingOtp function
+        function checkExistingOtp() {
+            $.get('/RoomOwner/CheckActiveOtp', function(response) {
+                if (response.success && response.otp) {
+                    activateOtpState(response.otp, response.expiresIn, response.remainingUses);
+                }
+            });
+        }
+
+        // Update the activateOtpState function
+        function activateOtpState(otp, expiresInSeconds, remainingUses) {
+            $('#generatedCode').text(otp);
+            $('#visitCodeDisplay').show();
+            $('#codeStatusContainer').show();
+            $('#usageCount').text(`Uses left: ${remainingUses}`).show();
+            $('#generateCodeBtn').prop('disabled', true).html('<i class="bi bi-key me-2"></i> Code Active');
+            startCountdown(expiresInSeconds);
+            updateUsageCount(remainingUses);
+        }
+
+            // Info Modal population
+            $(document).on('click', '.info-visitor-btn', function () {
+                const btn = $(this);
+                $('#infoUserId').text(btn.data('userid'));
+                $('#infoFullName').text(btn.data('fullname'));
+                $('#infoContact').text(btn.data('contact'));
+                const profilePic = btn.data('profilepic') || '/images/default.png';
+                $('#infoProfilePic').attr('src', profilePic);
+                $('#infoPurpose').text(btn.data('purposeofvisit'));
+            });
+
+            // Function to start the countdown timer
+            function startCountdown(seconds) {
+                clearInterval(countdownInterval);
+                const expiryTime = new Date();
+                expiryTime.setSeconds(expiryTime.getSeconds() + seconds);
+
+                function updateTimer() {
+                    const now = new Date();
+                    const diff = expiryTime - now;
+                    if (diff <= 0) {
+                        clearInterval(countdownInterval);
+                        resetCodeState();
+                        return;
+                    }
+                    const minutes = Math.floor(diff / 60000);
+                    const seconds = Math.floor((diff % 60000) / 1000);
+                    $('#expiryTimer').text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+                }
+
+                updateTimer();
+                countdownInterval = setInterval(updateTimer, 1000);
+            }
+
+            function resetCodeState() {
+                $('#generateCodeBtn').prop('disabled', false).html('<i class="bi bi-key me-2"></i> Generate Visit Code');
+                $('#visitCodeDisplay').hide();
+                $('#codeStatusContainer').hide();
+                $('#usageCount').hide();
+            }
+
+        // Add this function to update usage count
+        function updateUsageCount(count) {
+            if (count <= 0) {
+                resetCodeState();
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Code Expired',
+                    text: 'The visit code has been fully used and is now expired',
+                    confirmButtonColor: '#007bff'
+                });
+            } else {
+                $('#usageCount').text(`Uses left: ${count}`);
+            }
+        }
+
+            // Generate code form submission
+            $('#generateCodeForm').on('submit', function(e) {
+                e.preventDefault();
+                const btn = $('#generateCodeBtn');
+                btn.prop('disabled', true).html('<i class="bi bi-hourglass me-2"></i> Generating...');
+
+                $.ajax({
+                    url: $(this).attr('action'),
+                    method: 'POST',
+                    data: $(this).serialize(),
+                     success: function(response) {
+                        if (response.success) {
+                            activateOtpState(response.otp, response.expiresIn, response.remainingUses);
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: 'Visit Code Generated',
+                                text: response.message,
+                                showConfirmButton: false,
+                                timer: 3000,
+                                toast: true
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: response.message
+                            });
+                            btn.prop('disabled', false).html('<i class="bi bi-key me-2"></i> Generate Visit Code');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to generate visit code'
+                        });
+                        btn.prop('disabled', false).html('<i class="bi bi-key me-2"></i> Generate Visit Code');
+                    }
+                });
+            });
+
+            // Copy code button
+            $('#copyCodeBtn').click(function() {
+            const code = $('#generatedCode').text();
+            if (!code) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'No Code',
+                    text: 'Please generate a visit code first',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            navigator.clipboard.writeText(code).then(function() {
+                Swal.fire({
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Copied!',
+                    text: 'Visit code copied to clipboard',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    toast: true
+                });
+            }, function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to copy code'
+                });
+            });
+        });
+
+            // Handle approve button clicks
+            $(document).on('click', '.approve-btn', function() {
+                const visitLogId = $(this).data('visitlogid');
+                Swal.fire({
+                    title: 'Approve Appointment',
+                    text: 'Are you sure you want to approve this appointment?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, approve!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/RoomOwner/ApproveAppointment',
+                            type: 'POST',
+                            data: { VisitLogId: visitLogId },
+                            headers: {
+                                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        html: `Appointment has been approved.<br>Visits today: ${response.visitsToday}`,
+                                        icon: 'success'
+                                    }).then(() => {
+                                        refreshDashboard();
+                                    });
+                                } else {
+                                    Swal.fire('Error', response.message || 'Failed to approve appointment', 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Handle deny button clicks
+            $(document).on('click', '.deny-btn', function() {
+                const visitLogId = $(this).data('visitlogid');
+                Swal.fire({
+                    title: 'Deny Appointment',
+                    text: 'Are you sure you want to deny this appointment?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, deny!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/RoomOwner/DenyAppointment',
+                            type: 'POST',
+                            data: { VisitLogId: visitLogId },
+                            headers: {
+                                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Success!',
+                                        html: `Appointment has been denied.<br>Visits today: ${response.visitsToday}`,
+                                        icon: 'success'
+                                    }).then(() => {
+                                        refreshDashboard();
+                                    });
+                                } else {
+                                    Swal.fire('Error', response.message || 'Failed to deny appointment', 'error');
+                                }
+                            },
+                            error: function(xhr) {
+                                Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Refresh dashboard function
+            function refreshDashboard() {
+                $.get('@Url.Action("GetPendingAppointments", "RoomOwner")', function(data) {
+                    $('#pendingAppointmentsTable').html(data);
+                });
+                $.get('@Url.Action("GetStaffApprovalVisitsPartial", "RoomOwner")', function(data) {
+                    $('#staffApprovalTable').html(data);
+                });
+                $.get('@Url.Action("GetVerifiedAppointments", "RoomOwner")', function(data) {
+                    $('#verified-appointments-container').html(data);
+                });
+                updateQuickStats();
+            }
+
+            // Staff approval handling
+            $(document).on('click', '.approve-staff-btn', function() {
+                const visitLogId = $(this).data('visitlogid');
+                Swal.fire({
+                    title: 'Staff Approval Required',
+                    html: `<div class="text-start">
+                        <p>This visitor has no contact number. Please:</p>
+                        <ol>
+                            <li>Call the unit owner for verification</li>
+                            <li>Confirm visitor identity</li>
+                            <li>Approve only after successful verification</li>
+                        </ol>
+                        <p class="text-warning"><i class="fa-solid fa-triangle-exclamation"></i> This will auto-check-in the visitor</p>
+                    </div>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#28a745',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fa-solid fa-phone"></i> I called - Approve',
+                    cancelButtonText: 'Cancel',
+                    showLoaderOnConfirm: true,
+                    preConfirm: () => {
+                        return $.ajax({
+                            url: '/RoomOwner/ApproveStaffVisit',
+                            type: 'POST',
+                            data: { VisitLogId: visitLogId },
+                            headers: {
+                                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            }
+                        });
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const response = result.value;
+                        if (response.success) {
+                            Swal.fire({
+                                title: 'Success!',
+                                html: `Visit approved and auto-checked in.<br>
+                                      Visitor: ${response.visitorName}<br>
+                                      Room: ${response.roomNumber}`,
+                                icon: 'success'
+                            }).then(() => {
+                                refreshDashboard();
+                            });
+                        } else {
+                            Swal.fire('Error', response.message, 'error');
+                        }
+                    }
+                });
+            });
+
+            // Staff denial handling
+            $(document).on('click', '.deny-staff-btn', function() {
+                const visitLogId = $(this).data('visitlogid');
+                Swal.fire({
+                    title: 'Deny Staff Visit',
+                    text: 'Are you sure you want to deny this visit requiring staff approval?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Yes, deny!',
+                    cancelButtonText: 'Cancel'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $.ajax({
+                            url: '/RoomOwner/DenyAppointment',
+                            type: 'POST',
+                            data: { VisitLogId: visitLogId },
+                            headers: {
+                                'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire({
+                                        title: 'Visit Denied',
+                                        text: 'The visit has been denied successfully',
+                                        icon: 'success'
+                                    }).then(() => {
+                                        refreshDashboard();
+                                    });
+                                } else {
+                                    Swal.fire('Error', response.message, 'error');
+                                }
+                            }
+                        });
+                    }
+                });
+            });
+
+            // Update quick stats
+            function updateQuickStats() {
+                $.get('@Url.Action("GetQuickStats", "RoomOwner")', function(data) {
+                    $('.pending-count').text(data.pendingCount);
+                    $('.approved-today').text(data.approvedToday);
+                    $('.progress-bar-pending').css('width', data.pendingCount > 0 ? '100%' : '0%');
+                    $('.progress-bar-approved').css('width', data.approvedToday > 0 ? '100%' : '0%');
+                });
+            }
+        });
+    </script>
+}

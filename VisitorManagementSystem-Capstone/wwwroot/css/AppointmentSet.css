@@ -1,0 +1,461 @@
+﻿/* ========== GLOBAL STYLES ========== */
+body {
+    background: url('/images/symfoninichols.jpg') no-repeat center center fixed;
+    background-size: cover;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* ========== HEADER STYLES ========== */
+.header-bar {
+    width: 100%;
+    background-color: #1A2C4E;
+    color: #fff;
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    box-sizing: border-box;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+    .header-logo img {
+        height: 40px;
+        width: 40px;
+        margin-right: 10px;
+    }
+
+.header-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.login-btn {
+    background: #324c72;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    .login-btn:hover {
+        background: #415E72;
+        color: #fff;
+        text-decoration: none;
+    }
+
+.kiosk-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+    .kiosk-btn:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+
+/* ========== BACK BUTTON STYLES ========== */
+.back-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 20px;
+    background-color: transparent; /* Show body background */
+}
+
+.btn-back {
+    background-color: #5a6d8a;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    text-decoration: none;
+}
+
+    .btn-back:hover {
+        background-color: #4a5b75;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-back:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 3px rgba(0,0,0,0.1);
+        background-color: #3c4b63;
+    }
+
+    .btn-back i {
+        font-size: 0.8em;
+        transition: transform 0.2s ease;
+    }
+
+    .btn-back:hover i {
+        transform: translateX(-2px);
+    }
+
+/* ========== FORM WRAPPER ========== */
+.appointment-wrapper {
+    max-width: 1000px;
+    margin: 30px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1);
+}
+
+.appointment-container {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.form-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1A2C4E;
+    text-align: center;
+    margin-bottom: 30px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+    .form-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background: #007bff;
+        border-radius: 2px;
+    }
+
+/* ========== COLUMN LAYOUT ========== */
+.visitor-column,
+.appointment-column {
+    flex: 1;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1A2C4E;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #f0f4f8;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .section-title i {
+        color: #007bff;
+        font-size: 1.2em;
+    }
+
+/* ========== PROFILE SECTION ========== */
+.profile-section {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.profile-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+    .profile-preview:hover {
+        transform: scale(1.05);
+    }
+
+.visitor-name {
+    margin-top: 10px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+/* ========== FORM ELEMENTS ========== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        outline: none;
+    }
+    .form-control:disabled {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+/* ========== PURPOSE SECTION ========== */
+.purpose-group {
+    position: relative;
+}
+
+.purpose-dropdown {
+    margin-bottom: 10px;
+}
+
+#PurposeDropdown {
+    margin-bottom: 0.5rem !important;
+}
+
+.word-count {
+    font-size: 0.8rem;
+    text-align: right;
+    margin-top: 0.25rem;
+    color: #6c757d;
+}
+
+    .word-count.text-warning {
+        color: #ffc107;
+        font-weight: bold;
+    }
+
+    .word-count.text-danger {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+/* ========== SUBMIT BUTTON ========== */
+.submit-container {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-submit {
+    color: white !important;
+    font-weight: bold !important;
+    background: linear-gradient(to right, #1A2C4E, #007bff);
+    border: none;
+    padding: 14px 28px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn-submit:hover {
+        background: linear-gradient(to right, #14243f, #0069d9);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(26, 44, 78, 0.3);
+    }
+
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+/* ========== ALERTS ========== */
+.alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 14px;
+    animation: fadeIn 0.3s ease-out;
+}
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
+.alert-success {
+    background-color: #edf7ed;
+    color: #1e4620;
+    border: 1px solid #dcedc8;
+}
+
+.alert-danger {
+    background-color: #fdecea;
+    color: #621b16;
+    border: 1px solid #ffcdd2;
+}
+
+/* ========== VALIDATION STYLES ========== */
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4'/%3e%3cpath d='M6 7v1'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+    .is-invalid:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+.form-label .text-danger {
+    display: inline;
+}
+
+.form-label .fa-asterisk {
+    font-size: 0.6em;
+    vertical-align: super;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.visitor-column {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+.appointment-column {
+    animation: fadeInUp 0.5s ease-out 0.1s forwards;
+    opacity: 0;
+}
+
+/* ========== RESPONSIVE DESIGN ========== */
+@media (max-width: 992px) {
+    .appointment-container {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .appointment-wrapper {
+        margin: 20px;
+        padding: 20px;
+    }
+
+    .form-title {
+        font-size: 24px;
+    }
+
+    .appointment-container {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .header-bar {
+        flex-direction: column;
+        padding: 15px;
+        gap: 10px;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .back-button-container {
+        padding: 8px 15px;
+    }
+
+    .btn-back {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .appointment-wrapper {
+        margin: 15px;
+        padding: 20px 15px;
+    }
+
+    .form-title {
+        font-size: 22px;
+    }
+
+    .btn-submit {
+        padding: 12px;
+        font-size: 15px;
+    }
+}

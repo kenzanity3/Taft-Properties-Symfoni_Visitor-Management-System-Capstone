@@ -1,0 +1,201 @@
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.dashboard-header {
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 0;
+}
+
+.card-modern {
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .card-modern .card-header {
+        background-color: #ffffff;
+        color: #2c3e50;
+        font-weight: 600;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        padding: 1rem 1.5rem;
+    }
+    .card-modern:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    }
+
+
+.card-body {
+    padding: 1.5rem;
+}
+
+/* Generate code button */
+.btn-generate {
+    background: linear-gradient(45deg, #4e73df, #224abe);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+    .btn-generate:hover {
+        background: linear-gradient(45deg, #224abe, #4e73df);
+        transform: translateY(-2px);
+    }
+
+    .btn-generate:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+/* Button styles */
+.btn-approve {
+    background-color: #1cc88a;
+    color: white;
+}
+
+.btn-decline {
+    background-color: #e74a3b;
+    color: white;
+}
+
+.btn-details {
+    background-color: #36b9cc;
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+#copyCodeBtn {
+    transition: all 0.3s ease;
+}
+
+    #copyCodeBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    #copyCodeBtn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+/* Visit code display */
+.visit-code {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #4e73df;
+    background: #f8f9fc;
+    padding: 15px;
+    border-radius: 8px;
+    border: 2px dashed #4e73df;
+}
+
+/* Table styling */
+.report-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#expiryTimer {
+    font-weight: bold;
+    color: #e74a3b;
+}
+
+#codeStatusContainer {
+    background: #f8f9fc;
+    padding: 8px 15px;
+    border-radius: 8px;
+    border: 1px solid #e3e6f0;
+}
+/* Table styling */
+.report-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+    margin-bottom: 0;
+}
+
+    .table th {
+        border-top: none;
+        font-weight: 600;
+        color: #6e707e;
+        background-color: #f8f9fc;
+    }
+
+    /* Staff approval specific styles */
+    .table tr[data-visitlogid] .badge.bg-danger {
+        background: linear-gradient(45deg, #dc3545, #c82333);
+    }
+
+.approve-staff-btn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+}
+
+    .approve-staff-btn:hover {
+        background: linear-gradient(45deg, #218838, #1e9e8a);
+    }
+
+.alert-warning {
+    background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+    border: 1px solid #ffeaa7;
+}
+.list-group-item {
+    border-left: none;
+    border-right: none;
+    padding: 0.75rem 1.25rem;
+}
+
+    .list-group-item:first-child {
+        border-top: none;
+    }
+
+.progress {
+    border-radius: 4px;
+    height: 6px;
+}
+
+.progress-bar {
+    border-radius: 4px;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 5px 10px;
+}
+
+.bg-warning {
+    background-color: #f6c23e !important;
+}
+
+.text-muted {
+    color: #858796 !important;
+}
+
+@media (max-width: 768px) {
+    .dashboard-header {
+        font-size: 1.5rem;
+    }
+
+    #codeStatusContainer {
+        margin-top: 15px;
+        width: 100%;
+    }
+}

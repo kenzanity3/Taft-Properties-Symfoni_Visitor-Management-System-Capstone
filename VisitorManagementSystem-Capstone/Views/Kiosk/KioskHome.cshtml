@@ -1,0 +1,624 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.KioskHomeViewModel
+@{
+    ViewBag.Title = "Visitor Kiosk";
+    Layout = null;
+    ViewBag.HideSidebar = true;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visitor Kiosk - Symfoni Nichols</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/Kiosk.css" />
+    <style>
+        body {
+            background: url('/images/symfoninichols.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .kiosk-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem;
+        }
+        
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            background: white;
+            min-height: 280px;
+        }
+        
+        .action-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .card-icon {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        .action-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+        
+        .action-card p {
+            color: #7f8c8d;
+            margin-bottom: 1rem;
+        }
+        
+        .card-badge {
+            background: #3498db;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+        
+        .status-modal .modal-dialog {
+            max-width: 800px;
+        }
+        
+        .status-card {
+            cursor: pointer;
+        }
+        
+        .visitor-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #e9ecef;
+        }
+        
+        /* Animation classes from SymfoniHome */
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        .animate-slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+        
+        .animate-fade-out {
+            animation: fadeOut 0.5s ease-out;
+        }
+        
+        .animate-pulse {
+            animation: pulse 1s infinite;
+        }
+        
+        .btn-loading {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-loading::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @@keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @@keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @@keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        @@keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Header -->
+    <div class="kiosk-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="/lib/logo.png" alt="Facility Logo" class="header-logo" />
+                <div class="header-text">
+                    <h1>Symfoni Nichols</h1>
+                    <p>Visitor Management System</p>
+                </div>
+            </div>
+            <div class="header-info">
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Main Lobby Kiosk</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="kiosk-container">
+        <!-- Action Cards Grid -->
+        <div class="action-grid">
+            <!-- New Visitor Card -->
+            <a href="@Url.Action("KioskSignUp", "Kiosk")" class="action-card new-visitor">
+                <div class="card-icon">
+                    <i class="fas fa-user-plus fa-4x"></i>
+                </div>
+                <h3>New Visitor Registration</h3>
+                <p>Register first-time visitors</p>
+                <div class="card-badge">Start Here</div>
+            </a>
+
+            <!-- Check-In/Out Card -->
+            <a href="@Url.Action("KioskCheckInOut", "Kiosk")" class="action-card check-in">
+                <div class="card-icon">
+                    <i class="fas fa-sign-in-alt fa-4x"></i>
+                </div>
+                <h3>Check-In/Out</h3>
+                <p>Record visitor arrival and departure</p>
+            </a>
+
+            <!-- Facility Card -->
+            <a href="@Url.Action("FacilityManagement", "Facility")" class="action-card facility">
+                <div class="card-icon">
+                    <i class="fas fa-building fa-4x"></i>
+                </div>
+                <h3>Facilities</h3>
+                <p>Manage facility access</p>
+            </a>
+            
+            <!-- NEW: Appointment Status Card -->
+            <div class="action-card status-card" data-bs-toggle="modal" data-bs-target="#appointmentStatusModal">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-check fa-4x"></i>
+                </div>
+                <h3>Appointment Status</h3>
+                <p>Check your appointment details</p>
+                <div class="card-badge">Check Status</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Appointment Status Modal -->
+    <div class="modal fade status-modal" id="appointmentStatusModal" tabindex="-1" aria-labelledby="appointmentStatusModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="appointmentStatusModalLabel">
+                        <i class="fas fa-calendar-check me-2"></i> Check Appointment Status
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                        <input type="text"
+                               id="appointmentContactInput"
+                               class="form-control form-control-lg"
+                               placeholder="Enter your 11-digit contact number (09XXXXXXXXX)"
+                               maxlength="11"
+                               pattern="^09\d{9}$"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                        <button class="btn btn-primary" id="checkAppointmentBtn" type="button">
+                            <i class="fas fa-search me-2"></i> Check Status
+                        </button>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i> Enter the contact number you used when setting the appointment.
+                    </div>
+
+                    <!-- Loading animation -->
+                    <div id="appointmentLoading" class="text-center mt-3" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Checking appointments...</p>
+                    </div>
+
+                    <!-- Results Table -->
+                    <div class="table-responsive mt-3" id="appointmentResults" style="display: none;">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Contact Number</th>
+                                    <th>Room Number</th>
+                                    <th>Appointment Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appointmentResultBody">
+                                <!-- Results will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Add these utility functions from SymfoniHome
+        function animateElement(element, animationClass, removeAfter = true) {
+            if (!element) return;
+
+            element.classList.add(animationClass);
+            if (removeAfter) {
+                setTimeout(() => {
+                    element.classList.remove(animationClass);
+                }, 1000);
+            }
+        }
+
+        function showElementWithAnimation(element, animationClass = 'animate-fade-in') {
+            if (!element) return;
+
+            element.style.display = element instanceof HTMLTableRowElement ? 'table-row' : 'block';
+            // Force reflow
+            void element.offsetWidth;
+            element.classList.add(animationClass);
+        }
+
+        function hideElementWithAnimation(element, animationClass = 'animate-fade-out') {
+            if (!element) return;
+
+            element.classList.add(animationClass);
+            setTimeout(() => {
+                element.style.display = 'none';
+                element.classList.remove(animationClass);
+            }, 500);
+        }
+
+        // Initialize appointment check functionality
+        function initializeAppointmentCheck() {
+            const searchInput = document.getElementById('appointmentContactInput');
+            const searchBtn = document.getElementById('checkAppointmentBtn');
+            const resultsContainer = document.getElementById('appointmentResults');
+            const resultBody = document.getElementById('appointmentResultBody');
+            const loading = document.getElementById('appointmentLoading');
+
+            if (!searchInput || !searchBtn || !resultsContainer || !resultBody || !loading) {
+                console.error('Appointment check elements not found');
+                return;
+            }
+
+            // Search on button click
+            searchBtn.addEventListener('click', function() {
+                const contactNumber = searchInput.value.trim();
+                if (!validateContactNumber(contactNumber)) {
+                    showValidationError("Please enter a valid 11-digit contact number starting with 09");
+                    return;
+                }
+                checkAppointmentStatus(contactNumber);
+            });
+
+            // Also allow search on Enter key
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    searchBtn.click();
+                }
+            });
+
+            // Function to validate contact number
+            function validateContactNumber(contactNumber) {
+                return /^09\d{9}$/.test(contactNumber);
+            }
+
+            // Function to show validation error
+            function showValidationError(message) {
+                // Clear previous results
+                resultBody.innerHTML = '';
+                hideElementWithAnimation(resultsContainer);
+
+                // Remove any existing error messages
+                const modalBody = document.querySelector('.modal-body');
+                const existingError = modalBody.querySelector('.alert-danger');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+                // Create and show error message
+                const errorElement = document.createElement('div');
+                errorElement.className = 'alert alert-danger mt-3 animate-fade-in';
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> ${message}`;
+
+                // Insert after search bar
+                modalBody.appendChild(errorElement);
+
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (errorElement.parentNode) {
+                        hideElementWithAnimation(errorElement);
+                        setTimeout(() => errorElement.remove(), 500);
+                    }
+                }, 5000);
+            }
+
+            // Function to check appointment status
+            async function checkAppointmentStatus(contactNumber) {
+                try {
+                    // Show loading indicator with animation
+                    searchBtn.disabled = true;
+                    searchBtn.classList.add('btn-loading');
+                    showElementWithAnimation(loading, 'animate-fade-in');
+
+                    // Hide results with animation if they're visible
+                    if (resultsContainer.style.display === 'block') {
+                        hideElementWithAnimation(resultsContainer);
+                    }
+
+                    // Clear any previous errors
+                    const modalBody = document.querySelector('.modal-body');
+                    const existingError = modalBody.querySelector('.alert-danger');
+                    if (existingError) {
+                        hideElementWithAnimation(existingError);
+                        setTimeout(() => existingError.remove(), 500);
+                    }
+
+                    const response = await fetch('/Kiosk/CheckAppointmentStatus?contactNumber=' + encodeURIComponent(contactNumber));
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        displayAppointmentResults(data, contactNumber);
+                        setTimeout(() => {
+                            showElementWithAnimation(resultsContainer, 'animate-fade-in-up');
+                        }, 300);
+                    } else {
+                        showValidationError(data.message || 'No appointment found with this contact number');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showValidationError('Failed to check appointment status. Please try again.');
+                } finally {
+                    // Hide loading indicator
+                    searchBtn.disabled = false;
+                    searchBtn.classList.remove('btn-loading');
+                    hideElementWithAnimation(loading);
+                }
+            }
+
+            // Function to display appointment results
+            function displayAppointmentResults(data, contactNumber) {
+                resultBody.innerHTML = ''; // Clear previous results
+
+                // If no appointments
+                if (!data.hasAppointments) {
+                    const noAppointmentRow = document.createElement('tr');
+                    noAppointmentRow.innerHTML = `
+                        <td colspan="5" class="text-center py-4">
+                            <i class="fas fa-calendar-times fa-2x text-secondary mb-3"></i>
+                            <h5 class="text-muted">No appointments for this visitor</h5>
+                            <p class="text-muted small">Contact: ${data.contactNumber || contactNumber}</p>
+                        </td>
+                    `;
+                    resultBody.appendChild(noAppointmentRow);
+                    animateElement(noAppointmentRow, 'animate-fade-in-up');
+                    return;
+                }
+
+                // Process each appointment with staggered animations
+                data.appointments.forEach((appointment, index) => {
+                    setTimeout(() => {
+                        const row = document.createElement('tr');
+                        row.classList.add('animate-fade-in-up');
+                        row.style.animationDelay = `${index * 0.1}s`;
+
+                        // Status badge
+                        let statusBadge;
+                        if (appointment.status === 'approved') {
+                            statusBadge = '<span class="badge bg-success">Approved</span>';
+                        } else if (appointment.status === 'denied') {
+                            statusBadge = '<span class="badge bg-danger">Denied</span>';
+                        } else {
+                            statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                        }
+
+                        // Format the appointment date
+                        let formattedDate = 'N/A';
+                        if (appointment.appointmentDate && appointment.appointmentDate !== 'N/A') {
+                            const dateObj = new Date(appointment.appointmentDate);
+                            if (!isNaN(dateObj.getTime())) {
+                                formattedDate = dateObj.toLocaleString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                });
+                            }
+                        }
+
+                        // Actions - only show cancel button for pending appointments
+                        let actions = '';
+                        if (appointment.status === 'pending') {
+                            actions = `<button class="btn btn-danger btn-sm" onclick="cancelAppointment('${contactNumber}', ${appointment.id || 0})">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>`;
+                        } else {
+                            actions = '<span class="text-muted">No Actions</span>';
+                        }
+
+                        row.innerHTML = `
+                            <td>${data.contactNumber || contactNumber}</td>
+                            <td>${appointment.roomNumber || 'N/A'}</td>
+                            <td>${formattedDate}</td>
+                            <td>${statusBadge}</td>
+                            <td>${actions}</td>
+                        `;
+
+                        resultBody.appendChild(row);
+                    }, index * 100);
+                });
+            }
+
+            // Add button click animation
+            searchBtn.addEventListener('click', function() {
+                animateElement(this, 'animate-pulse', false);
+                setTimeout(() => {
+                    this.classList.remove('animate-pulse');
+                }, 1000);
+            });
+
+            // Add input focus animation
+            searchInput.addEventListener('focus', function() {
+                this.classList.add('animate-pulse');
+            });
+
+            searchInput.addEventListener('blur', function() {
+                this.classList.remove('animate-pulse');
+            });
+        }
+
+        // Cancel appointment function (same as SymfoniHome)
+        window.cancelAppointment = async function(contactNumber, appointmentId = 0) {
+            const { isConfirmed } = await Swal.fire({
+                title: 'Cancel Appointment',
+                text: 'Are you sure you want to cancel this appointment?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, cancel it!'
+            });
+
+            if (isConfirmed) {
+                try {
+                    const response = await fetch('/Kiosk/CancelAppointment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                        },
+                        body: JSON.stringify({
+                            contactNumber: contactNumber,
+                            appointmentId: appointmentId
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.message || 'Failed to cancel appointment');
+                    }
+
+                    if (data.success) {
+                        await Swal.fire(
+                            'Cancelled!',
+                            data.message || 'Your appointment has been cancelled.',
+                            'success'
+                        );
+                        // Refresh results by triggering search again
+                        const searchBtn = document.getElementById('checkAppointmentBtn');
+                        if (searchBtn) searchBtn.click();
+                    } else {
+                        throw new Error(data.message || 'Failed to cancel appointment');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    await Swal.fire(
+                        'Error',
+                        error.message || 'Failed to cancel appointment. Please try again.',
+                        'error'
+                    );
+                }
+            }
+        };
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAppointmentCheck();
+            
+            // Add hover effects to action cards
+            const actionCards = document.querySelectorAll('.action-card');
+            actionCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0,0,0,0.2)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                });
+            });
+        });
+    </script>
+</body>
+</html>

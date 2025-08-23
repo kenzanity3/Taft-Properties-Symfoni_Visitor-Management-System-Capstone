@@ -1,0 +1,943 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.KioskHomeViewModel
+@{
+    ViewBag.Title = "Visitor Check-In/Out";
+    Layout = null;
+    ViewBag.HideSidebar = true;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visitor Check-In/Out - Symfoni Nichols</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/Kiosk.css" />
+    <style>
+        body {
+            background: url('/images/symfoninichols.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .kiosk-container {
+            flex: 1;
+            padding: 2rem;
+        }
+        
+        .kiosk-action-card {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            background: white;
+            min-height: 250px;
+            cursor: pointer;
+        }
+        
+        .kiosk-action-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .action-icon {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        .visitor-photo {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #e9ecef;
+        }
+        
+        .table tbody tr {
+            animation: slideInRow 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateX(-10px);
+        }
+        
+        @@keyframes slideInRow {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .purpose-dropdown {
+            margin-bottom: 1rem;
+        }
+
+        .word-count {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        .text-warning {
+            color: #ffc107 !important;
+        }
+
+        .text-danger {
+            color: #dc3545 !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Header - Same as KioskHome -->
+    <div class="kiosk-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="/lib/logo.png" alt="Facility Logo" class="header-logo" />
+                <div class="header-text">
+                    <h1>Symfoni Nichols</h1>
+                    <p>Visitor Check-In/Out System</p>
+                </div>
+            </div>
+            <div class="header-info">
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Main Lobby Kiosk</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="kiosk-container">
+        <!-- Action Buttons -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card kiosk-action-card h-100 text-center" data-bs-toggle="modal" data-bs-target="#checkInModal">
+                    <div class="card-body">
+                        <div class="action-icon mb-3">
+                            <i class="fas fa-sign-in-alt fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="card-title">Check-In</h3>
+                        <p class="card-text">Record visitor arrival</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="card kiosk-action-card h-100 text-center" data-bs-toggle="modal" data-bs-target="#checkOutModal">
+                    <div class="card-body">
+                        <div class="action-icon mb-3">
+                            <i class="fas fa-sign-out-alt fa-3x text-danger"></i>
+                        </div>
+                        <h3 class="card-title">Check-Out</h3>
+                        <p class="card-text">Record visitor departure</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Activity Tables -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-sign-in-alt me-2"></i> Today's Check-Ins</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="checkInTable" class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Visitor Name</th>
+                                        <th>Check-In Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var checkIn in Model.CheckIns)
+                                    {
+                                        <tr>
+                                            <td>@checkIn.VisitorName</td>
+                                            <td>@checkIn.CheckInTime</td>
+                                            <td>
+                                                @if (checkIn.CheckOutTime == "Still Checked In")
+                                                {
+                                                    <span class="badge bg-warning">Still Checked In</span>
+                                                }
+                                                else
+                                                {
+                                                    @checkIn.CheckOutTime
+                                                }
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-sign-out-alt me-2"></i> Today's Check-Outs</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table id="checkOutTable" class="table table-striped table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Visitor Name</th>
+                                        <th>Check-In Time</th>
+                                        <th>Check-Out Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var checkOut in Model.CheckOuts)
+                                    {
+                                        <tr>
+                                            <td>@checkOut.VisitorName</td>
+                                            <td>@checkOut.CheckInTime</td>
+                                            <td>@checkOut.CheckOutTime</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-In Modal -->
+    <div class="modal fade" id="checkInModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Visitor Check-In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Switch -->
+                    <div class="mb-3 text-center">
+                        <label class="form-label fw-bold">Check-In Type</label>
+                        <div class="form-check form-switch d-flex justify-content-center">
+                            <input class="form-check-input" type="checkbox" id="checkInTypeSwitch">
+                            <label class="form-check-label ms-2" for="checkInTypeSwitch" id="checkInTypeLabel">
+                                Appointment
+                            </label>
+                        </div>
+                    </div>
+
+                    <form id="checkInForm">
+                        <!-- Profile Picture Preview -->
+                        <div class="text-center mb-3">
+                            <img src="/images/default.png" id="checkInProfilePreview" class="visitor-photo" alt="Visitor Photo">
+                            <h6 id="checkInVisitorName"></h6>
+                        </div>
+
+                        <!-- Always shown -->
+                        <div class="mb-3">
+                            <label>Contact Number</label>
+                            <input type="tel" class="form-control" id="checkInContact"
+                                   required pattern="[0-9]{11}" title="Please enter an 11-digit phone number"
+                                   placeholder="09123456789" maxlength="11" minlength="11">
+                        </div>
+
+                        <!-- Walk-In fields -->
+                        <div id="walkInFields">
+                            <div class="mb-3">
+                                <label>Host Identifier (Visit Code) <span class="text-muted">(optional)</span></label>
+                                <input type="text" class="form-control" id="checkInVisitCode"
+                                       placeholder="e.g., ABC123"
+                                       pattern="[A-Z0-9]{6}" title="6-character alphanumeric code"
+                                       oninput="fetchWalkInRoomDetails()">
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Host Name</label>
+                                <input type="text" class="form-control" id="hostName">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label>Tower</label>
+                                <select id="tower" class="form-select">
+                                    <option selected disabled value="">-- Select Tower --</option>
+                                    <option value="Alto">Alto</option>
+                                    <option value="Bossa">Bossa</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label>Unit Number</label>
+                                <input type="text" class="form-control" id="unitNumber">
+                            </div>
+
+                            <!-- Purpose of Visit with Dropdown -->
+                            <div class="mb-3">
+                                <label class="form-label">Purpose of Visit</label>
+                                <select class="form-control purpose-dropdown" id="purposeDropdown" onchange="updatePurposeFromDropdown()">
+                                    <option value="">-- Select a purpose --</option>
+                                    <option value="Personal Visit">Personal Visit</option>
+                                    <option value="Delivery">Delivery</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Other">Other (specify below)</option>
+                                </select>
+                                <textarea class="form-control" id="purposeVisit" rows="3" 
+                                          placeholder="Describe your visit purpose..." 
+                                          maxlength="1000" oninput="updatePurposeWordCount(this.value.length)"></textarea>
+                                <div class="word-count" id="purposeWordCount">0 / 1000 characters</div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Check-In</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Check-Out Modal -->
+    <div class="modal fade" id="checkOutModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Visitor Check-Out</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="checkOutForm">
+                        <!-- Profile Picture Preview -->
+                        <div class="text-center mb-3">
+                            <img src="/images/default.png" id="checkOutProfilePreview" class="visitor-photo" alt="Visitor Photo">
+                            <h6 id="checkOutVisitorName"></h6>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Contact Number</label>
+                            <input type="tel" class="form-control" id="checkOutContact"
+                                   required pattern="[0-9]{11}" title="Please enter an 11-digit phone number"
+                                   placeholder="09123456789" oninput="updateCheckOutProfilePreview()"
+                                   maxlength="11" minlength="11">
+                            <small class="text-muted">Enter your registered contact number</small>
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Check-Out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass Modal -->
+    <div class="modal fade" id="passModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center">
+                <div class="modal-body">
+                    <div class="pass-card">
+                        <h5>Visitor Pass</h5>
+                        <p><strong>Name:</strong> <span id="passName"></span></p>
+                        <p><strong>Visiting:</strong> <span id="passHost"></span></p>
+                        <p><strong>Unit:</strong> <span id="passUnit"></span></p>
+                        <p><strong>Purpose:</strong> <span id="passPurpose"></span></p>
+                    </div>
+                    <button class="btn btn-success mt-3" onclick="window.print()">Print Pass</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Kiosk Home Button -->
+    <div class="text-center mt-4">
+        <a href="@Url.Action("KioskHome", "Kiosk")" class="btn btn-secondary btn-lg">
+            <i class="fas fa-arrow-left me-2"></i> Back to Kiosk Home
+        </a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all event listeners
+            initializeEventListeners();
+            
+            // Initialize Walk-In/Appointment switch
+            const switchInput = document.getElementById("checkInTypeSwitch");
+            const typeLabel = document.getElementById("checkInTypeLabel");
+            const walkInFields = document.getElementById("walkInFields");
+
+            // Helper: Set required attributes for Walk-In fields
+            function setWalkInRequired(isRequired) {
+                const requiredFields = ["hostName", "tower", "unitNumber", "purposeVisit"];
+                requiredFields.forEach(fieldId => {
+                    const field = document.getElementById(fieldId);
+                    if (field) {
+                        if (isRequired) {
+                            field.setAttribute("required", "required");
+                        } else {
+                            field.removeAttribute("required");
+                        }
+                    }
+                });
+            }
+
+            // Default: Walk-In is selected
+            switchInput.checked = true;
+            typeLabel.textContent = "Walk-In";
+            walkInFields.style.display = "block";
+            setWalkInRequired(true);
+
+            // Switch change handler
+            switchInput.addEventListener("change", function() {
+                if (switchInput.checked) {
+                    // Walk-In
+                    typeLabel.textContent = "Walk-In";
+                    walkInFields.style.display = "block";
+                    setWalkInRequired(true);
+                } else {
+                    // Appointment
+                    typeLabel.textContent = "Appointment";
+                    walkInFields.style.display = "none";
+                    setWalkInRequired(false);
+                }
+            });
+        });
+
+        // ==================== PURPOSE OF VISIT FUNCTIONS ====================
+        function updatePurposeFromDropdown() {
+            const dropdown = document.getElementById("purposeDropdown");
+            const textarea = document.getElementById("purposeVisit");
+
+            if (dropdown.value === "Other") {
+                textarea.value = "";
+                textarea.focus();
+                textarea.dataset.userEdited = "true";
+            } else if (dropdown.value) {
+                textarea.value = dropdown.value;
+                textarea.dataset.userEdited = "";
+            }
+            updatePurposeWordCount(textarea.value.length);
+        }
+
+        function updatePurposeWordCount(count) {
+            const wordCountElement = document.getElementById("purposeWordCount");
+            wordCountElement.textContent = `${count} / 1000 characters`;
+
+            // Add warning class if approaching limit
+            if (count > 900) {
+                wordCountElement.classList.add('text-warning');
+                wordCountElement.classList.remove('text-danger');
+            } else if (count > 1000) {
+                wordCountElement.classList.add('text-danger');
+                wordCountElement.classList.remove('text-warning');
+            } else {
+                wordCountElement.classList.remove('text-warning', 'text-danger');
+            }
+        }
+
+        // ==================== ROOM DETAILS FETCHING ====================
+        async function fetchWalkInRoomDetails() {
+            const visitCode = document.getElementById("checkInVisitCode").value.trim();
+            const unitNumberInput = document.getElementById("unitNumber");
+            const hostNameInput = document.getElementById("hostName");
+            const towerInput = document.getElementById("tower");
+
+            if (!visitCode || visitCode.length !== 6) {
+                resetRoomFields();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/VisitorAppointment/GetRoomOwnerByVisitCode?visitCode=${encodeURIComponent(visitCode)}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+
+                const data = await response.json();
+                if (data.success) {
+                    unitNumberInput.value = data.roomNumber || "";
+                    hostNameInput.value = data.fullName || "";
+                    towerInput.value = data.tower || "";
+
+                    // Make inputs readonly when visit code is provided
+                    unitNumberInput.readOnly = true;
+                    hostNameInput.readOnly = true;
+                    towerInput.setAttribute("data-readonly", "true");
+                } else {
+                    showErrorAlert(data.message || 'Invalid visit code');
+                    resetRoomFields();
+                }
+            } catch (error) {
+                console.error("Error fetching room details:", error);
+                showErrorAlert('Failed to fetch room details');
+                resetRoomFields();
+            }
+
+            function resetRoomFields() {
+                unitNumberInput.value = "";
+                hostNameInput.value = "";
+                towerInput.value = "";
+                unitNumberInput.readOnly = false;
+                hostNameInput.readOnly = false;
+                towerInput.removeAttribute("data-readonly");
+            }
+        }
+
+        function showErrorAlert(message) {
+            return Swal.fire({
+                title: 'Validation Error',
+                html: message,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        // Profile preview for Check-In modal
+        async function updateCheckInProfilePreview() {
+            const contactNumber = document.getElementById("checkInContact").value.trim();
+            const profileImg = document.getElementById("checkInProfilePreview");
+            const visitorName = document.getElementById("checkInVisitorName");
+            const isAppointment = !document.getElementById("checkInTypeSwitch").checked;
+
+            // Show loading state
+            profileImg.src = "/images/loading.gif";
+            visitorName.textContent = "Searching...";
+
+            if (contactNumber.length === 11) {
+                try {
+                    // Check visitor status
+                    const visitorResponse = await fetch(`/Kiosk/CheckVisitorStatus?contactNumber=${encodeURIComponent(contactNumber)}`);
+                    const visitorData = await visitorResponse.json();
+
+                    if (visitorData.success) {
+                        // Success - show profile
+                        profileImg.src = visitorData.visitor.profilePicture || "/images/default.png";
+                        
+                        // Check appointment status if in appointment mode
+                        if (isAppointment) {
+                            const appointmentResponse = await fetch(`/Kiosk/CheckAppointmentApproval?contactNumber=${encodeURIComponent(contactNumber)}`);
+                            const appointmentData = await appointmentResponse.json();
+                            
+                            if (appointmentData.success && appointmentData.hasApprovedAppointment) {
+                                visitorName.innerHTML = `${visitorData.visitor.fullName} <i class="fas fa-check-circle text-success"></i><br><small class="text-success">Approved Appointment</small>`;
+                            } else {
+                                visitorName.innerHTML = `${visitorData.visitor.fullName} <i class="fas fa-times-circle text-danger"></i><br><small class="text-danger">No Approved Appointment</small>`;
+                            }
+                        } else {
+                            visitorName.textContent = visitorData.visitor.fullName;
+                        }
+                        
+                        visitorName.style.color = "#28a745";
+                    } else {
+                        // Visitor not found
+                        profileImg.src = "/images/default.png";
+                        visitorName.textContent = "Visitor not found";
+                        visitorName.style.color = "#dc3545";
+                    }
+                } catch (error) {
+                    console.error("Error fetching visitor profile:", error);
+                    profileImg.src = "/images/default.png";
+                    visitorName.textContent = "Error loading profile";
+                    visitorName.style.color = "#dc3545";
+                }
+            } else if (contactNumber.length > 0 && contactNumber.length < 11) {
+                // Not enough digits
+                profileImg.src = "/images/default.png";
+                visitorName.textContent = "Enter 11-digit number";
+                visitorName.style.color = "#ffc107";
+            } else {
+                // Empty field
+                profileImg.src = "/images/default.png";
+                visitorName.textContent = "";
+            }
+        }
+
+        // Add event listener to switch to update profile preview when toggled
+        document.getElementById("checkInTypeSwitch")?.addEventListener("change", function() {
+            const contactNumber = document.getElementById("checkInContact").value;
+            if (contactNumber && contactNumber.length === 11) {
+                updateCheckInProfilePreview();
+            }
+        });
+
+        // Profile preview for Check-Out modal
+        async function updateCheckOutProfilePreview() {
+            const contactNumber = document.getElementById("checkOutContact").value.trim();
+            const profileImg = document.getElementById("checkOutProfilePreview");
+            const visitorName = document.getElementById("checkOutVisitorName");
+
+            // Show loading state
+            profileImg.src = "/images/loading.gif";
+            visitorName.textContent = "Searching...";
+
+            if (contactNumber.length === 11) {
+                try {
+                    const response = await fetch(`/VisitorAppointment/GetVisitorProfile?contactNumber=${encodeURIComponent(contactNumber)}`);
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Success - show profile
+                        profileImg.src = data.profilePicture || "/images/default.png";
+                        visitorName.textContent = data.fullName || "Visitor Found";
+                        visitorName.style.color = "#28a745";
+                    } else {
+                        // Visitor not found
+                        profileImg.src = "/images/default.png";
+                        visitorName.textContent = "Visitor not found";
+                        visitorName.style.color = "#dc3545";
+                    }
+                } catch (error) {
+                    console.error("Error fetching visitor profile:", error);
+                    profileImg.src = "/images/default.png";
+                    visitorName.textContent = "Error loading profile";
+                    visitorName.style.color = "#dc3545";
+                }
+            } else if (contactNumber.length > 0 && contactNumber.length < 11) {
+                // Not enough digits
+                profileImg.src = "/images/default.png";
+                visitorName.textContent = "Enter 11-digit number";
+                visitorName.style.color = "#ffc107";
+            } else {
+                // Empty field
+                profileImg.src = "/images/default.png";
+                visitorName.textContent = "";
+            }
+        }
+
+        // ==================== VALIDATION FUNCTIONS ====================
+        function validateContactNumber(element) {
+            const value = element.value.trim();
+            if (!value) return "is required";
+            if (value.length !== 11) return "must be 11 digits";
+            return null;
+        }
+
+        function validateRequired(element) {
+            return !element.value.trim() ? "is required" : null;
+        }
+
+        function validatePurpose(element) {
+            const value = element.value.trim();
+            if (!value) return "is required";
+            if (value.length > 1000) return "cannot exceed 1000 characters";
+            return null;
+        }
+
+        async function validateFormWithSweetAlert() {
+            const requiredFields = [
+                { id: "checkInContact", name: "Contact Number", validate: validateContactNumber }
+            ];
+
+            const isAppointment = !document.getElementById("checkInTypeSwitch").checked;
+            
+            if (!isAppointment) {
+                // For walk-ins, add additional required fields
+                requiredFields.push(
+                    { id: "hostName", name: "Host Name", validate: validateRequired },
+                    { id: "tower", name: "Tower", validate: validateRequired },
+                    { id: "unitNumber", name: "Unit Number", validate: validateRequired },
+                    { id: "purposeVisit", name: "Purpose of Visit", validate: validatePurpose }
+                );
+            }
+
+            let errorMessages = [];
+            let firstInvalidField = null;
+
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                const error = field.validate(element);
+
+                if (error) {
+                    if (!firstInvalidField) firstInvalidField = element;
+                    element.classList.add('is-invalid');
+                    errorMessages.push(`• ${field.name}: ${error}`);
+                } else {
+                    element.classList.remove('is-invalid');
+                }
+            });
+
+            if (errorMessages.length > 0) {
+                await showErrorAlert(`Please fix the following issues:<br><br>${errorMessages.join('<br>')}`);
+                firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return false;
+            }
+
+            return true;
+        }
+
+        // ==================== FORM SUBMISSION HANDLERS ====================
+        function initializeEventListeners() {
+            // Check-In form submission
+            document.getElementById("checkInForm")?.addEventListener("submit", async function(e) {
+                e.preventDefault();
+
+                const contactNumber = document.getElementById("checkInContact").value;
+                const isAppointment = !document.getElementById("checkInTypeSwitch").checked;
+                const visitCode = document.getElementById("checkInVisitCode").value;
+
+                // Validate form
+                const isValid = await validateFormWithSweetAlert();
+                if (!isValid) return;
+
+                // Validate contact number
+                if (!contactNumber || contactNumber.length !== 11) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Contact Number',
+                        text: 'Please enter a valid 11-digit contact number'
+                    });
+                    return;
+                }
+
+                // For appointments, check if approved
+                if (isAppointment) {
+                    try {
+                        const appointmentCheck = await fetch(`/Kiosk/CheckAppointmentApproval?contactNumber=${encodeURIComponent(contactNumber)}`);
+                        const appointmentData = await appointmentCheck.json();
+
+                        if (!appointmentData.success || !appointmentData.hasApprovedAppointment) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'No Approved Appointment',
+                                text: 'You do not have an approved appointment for today. Please use walk-in check-in instead.',
+                                confirmButtonText: 'OK'
+                            });
+                            return;
+                        }
+                    } catch (error) {
+                        console.error("Error checking appointment:", error);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error Checking Appointment',
+                            text: 'An error occurred while checking your appointment status.',
+                            confirmButtonText: 'OK'
+                        });
+                        return;
+                    }
+                }
+
+                // Check if visitor exists
+                const visitorCheck = await fetch(`/Kiosk/CheckVisitorStatus?contactNumber=${encodeURIComponent(contactNumber)}`);
+                const visitorData = await visitorCheck.json();
+
+                if (!visitorData.success) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Visitor Not Found',
+                        text: 'Please register as a new visitor first.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                if (visitorData.visitor.isCheckedIn) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Already Checked In',
+                        text: 'This visitor is already checked in. Please check out first.',
+                        confirmButtonText: 'OK'
+                    });
+                    return;
+                }
+
+                // Prepare check-in data
+                const checkInData = {
+                    ContactNumber: contactNumber,
+                    HostName: document.getElementById("hostName").value,
+                    Tower: document.getElementById("tower").value,
+                    UnitNumber: document.getElementById("unitNumber").value,
+                    PurposeVisit: document.getElementById("purposeVisit").value,
+                    IsAppointment: isAppointment,
+                    VisitCode: visitCode
+                };
+
+                // Show loading
+                Swal.fire({
+                    title: 'Processing Check-In',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+                    // Process check-in using POSTViewModel's CheckInOutAsync
+                    const response = await fetch('/Kiosk/ProcessCheckIn', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(checkInData)
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Update visitor pass
+                        document.getElementById("passName").textContent = visitorData.visitor.fullName;
+                        document.getElementById("passHost").textContent = checkInData.HostName;
+                        document.getElementById("passUnit").textContent = checkInData.UnitNumber;
+                        document.getElementById("passPurpose").textContent = checkInData.PurposeVisit;
+
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Check-In Successful!',
+                            text: result.isAppointment ? 
+                                'Appointment check-in completed successfully.' : 
+                                'Walk-in check-in completed successfully.',
+                            confirmButtonText: 'OK'
+                        });
+
+                        // Show pass modal
+                        bootstrap.Modal.getInstance(document.getElementById("checkInModal")).hide();
+                        new bootstrap.Modal(document.getElementById("passModal")).show();
+
+                        // Refresh the page to update tables
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Check-In Failed',
+                        text: error.message || 'An error occurred during check-in',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+
+            // Check-Out form submission
+            document.getElementById("checkOutForm")?.addEventListener("submit", async function(e) {
+                e.preventDefault();
+                const contactNumber = document.getElementById("checkOutContact").value;
+
+                // Validate contact number
+                if (!contactNumber || contactNumber.length !== 11) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Contact Number',
+                        text: 'Please enter a valid 11-digit contact number'
+                    });
+                    return;
+                }
+
+                // Show loading
+                Swal.fire({
+                    title: 'Processing Check-Out',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+                    // Process check-out
+                    const response = await fetch('/Kiosk/ProcessCheckOut', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ContactNumber: contactNumber })
+                    });
+
+                    const result = await response.json();
+
+                    if (result.success) {
+                        // Show success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Check-Out Successful!',
+                            text: 'Visitor has been checked out successfully.',
+                            confirmButtonText: 'OK'
+                        });
+
+                        // Hide modal and refresh page
+                        bootstrap.Modal.getInstance(document.getElementById("checkOutModal")).hide();
+
+                        // Refresh the page to update tables
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        throw new Error(result.message);
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Check-Out Failed',
+                        text: error.message || 'An error occurred during check-out',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            });
+
+            // Contact number input handlers
+            const checkInContact = document.getElementById("checkInContact");
+            if (checkInContact) {
+                checkInContact.addEventListener('input', function() {
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(updateCheckInProfilePreview, 500);
+                });
+            }
+
+            const checkOutContact = document.getElementById("checkOutContact");
+            if (checkOutContact) {
+                checkOutContact.addEventListener('input', function() {
+                    clearTimeout(this.timer);
+                    this.timer = setTimeout(updateCheckOutProfilePreview, 500);
+                });
+            }
+
+            // Purpose textarea handling
+            const purposeTextarea = document.getElementById("purposeVisit");
+            if (purposeTextarea) {
+                purposeTextarea.addEventListener('input', function() {
+                    updatePurposeWordCount(this.value.length);
+                    
+                    // If user types something different from dropdown, clear dropdown selection
+                    const dropdown = document.getElementById("purposeDropdown");
+                    if (dropdown.value && this.value !== dropdown.value) {
+                        dropdown.value = "";
+                    }
+                    
+                    this.dataset.userEdited = this.value.trim() ? "true" : "";
+                });
+            }
+
+            // Tower dropdown readonly handling
+            const towerInput = document.getElementById("tower");
+            if (towerInput) {
+                towerInput.addEventListener('mousedown', function(e) {
+                    if (this.hasAttribute("data-readonly")) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        }
+
+        // Add table row animations
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableRows = document.querySelectorAll('.table tbody tr');
+            tableRows.forEach((row, index) => {
+                row.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>

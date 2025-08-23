@@ -1,0 +1,158 @@
+﻿/* Room Owner Management Page - css */
+
+body {
+    background-color: #f4f6f9;
+}
+
+h2 {
+    color: #1A2C4E;
+    font-weight: bold;
+}
+
+.btn-add,
+.btn-refresh {
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: white;
+    transition: 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-add {
+    background-color: #1A2C4E;
+}
+
+.btn-refresh {
+    background-color: #6c757d;
+    margin-right: 10px;
+}
+
+.btn-add:hover {
+    background-color: #324c72;
+}
+
+.btn-refresh:hover {
+    background-color: #5a6268;
+}
+
+.roomowner-wrapper {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.table th,
+.table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table thead {
+    background-color: #1A2C4E;
+    color: white;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+/* Profile image styling for modals */
+.profile-img-preview {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 3px solid #1A2C4E;
+    background: #f4f6f9;
+    display: block;
+    margin: 0 auto 16px auto;
+}
+
+.modal-lg {
+    max-width: 700px;
+}
+.modal-header {
+    background-color: #1A2C4E;
+    color: white;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+.modal-content {
+    border-radius: 16px;
+}
+
+.modal-footer .btn {
+    border-radius: 8px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #1A2C4E;
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+}
+/* Add to your RoomOwnerManagement.css */
+.btn-refresh, .btn-add {
+    position: relative;
+}
+
+    .btn-refresh .spinner-border,
+    .btn-add .spinner-border {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        margin-left: -0.5rem;
+        margin-top: -0.5rem;
+    }
+.form-switch .form-check-input {
+    width: 3em;
+    height: 1.5em;
+    margin-left: 0.5em;
+    cursor: pointer;
+}
+
+.form-switch .form-check-label {
+    margin-left: 0.5em;
+    font-weight: 500;
+    cursor: pointer;
+}
+input[type="file"].form-control {
+    padding: 6px;
+}
+
+#infoProfilePic {
+    border: 2px solid #1A2C4E;
+    background: #f4f6f9;
+}
+
+.info-id-card {
+    background: #f4f6f9;
+    border: 2px solid #1A2C4E;
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(26,44,78,0.08);
+}
+.info-id-card .profile-img-preview {
+    margin-bottom: 12px;
+}
+.info-id-card .badge {
+    font-size: 1.1rem;
+    margin-top: 8px;
+}
+
+@media (max-width: 768px) {
+    .roomowner-wrapper {
+        padding: 10px;
+    }
+
+    .modal-content {
+        border-radius: 10px;
+    }
+}

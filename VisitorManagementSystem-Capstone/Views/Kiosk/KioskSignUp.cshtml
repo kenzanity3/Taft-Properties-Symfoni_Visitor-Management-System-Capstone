@@ -1,0 +1,360 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.POSTViewModel
+@{
+    ViewBag.Title = "Visitor Registration";
+    Layout = null;
+    ViewBag.HideSidebar = true;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Symfoni Nichols Visitor Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+    <link rel="stylesheet" href="~/css/Kiosk.css" />
+ <style>
+        body {
+            background: url('/images/symfoninichols.jpg') no-repeat center center fixed;
+            background-size: cover;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Header -->
+    <div class="kiosk-header">
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="/lib/logo.png" alt="Facility Logo" class="header-logo" />
+                <div class="header-text">
+                    <h1>Symfoni Nichols</h1>
+                    <p>Visitor Management System</p>
+                </div>
+            </div>
+            <div class="header-info">
+                <div class="info-item">
+                    <i class="fas fa-clock"></i>
+                    <span>@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Main Lobby Kiosk</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="kiosk-register-container" data-aos="zoom-in" data-aos-duration="800">
+        <div class="kiosk-register-header">
+            <h1>Visitor Registration</h1>
+            <p>Visitor Registration Kiosk</p>
+        </div>
+
+        @if (ViewData.ModelState.ErrorCount > 0)
+        {
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@modelError.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <form asp-action="KioskSignUp" method="post" enctype="multipart/form-data" id="kioskRegistrationForm">
+            <!-- Profile Picture Section -->
+            <div class="profile-container">
+                <img id="profilePreview" src="/images/default.png" alt="Profile Preview" />
+                <label class="profile-upload" for="ProfilePictureFile">
+                    <i class="fas fa-camera"></i>
+                </label>
+                <input asp-for="ProfilePictureFile" type="file" id="ProfilePictureFile"
+                       accept="image/jpeg,image/png" style="display:none"
+                       onchange="validateAndPreviewImage(event)" />
+            </div>
+            <div class="input-hint text-center">Max 2MB (JPEG/PNG)</div>
+            <span asp-validation-for="ProfilePictureFile" class="field-validation-error text-center"></span>
+
+            <!-- Personal Information Section -->
+            <div class="mb-3">
+                <label class="form-label mt-3 fw-bold">Personal Information</label>
+
+                <input asp-for="User.FirstName" class="form-control"
+                       placeholder="First Name (required)" required
+                       data-val="true"
+                       data-val-required="First name is required"
+                       data-val-regex="Only letters and spaces allowed"
+                       data-val-regex-pattern="^[A-Za-z\s]{2,50}$" />
+                <span asp-validation-for="User.FirstName" class="field-validation-error"></span>
+
+                <input asp-for="User.MiddleName" class="form-control mt-2"
+                       placeholder="Middle Name (optional)"
+                       data-val-regex="Only letters and spaces allowed"
+                       data-val-regex-pattern="^[A-Za-z\s]{0,50}$" />
+                <span asp-validation-for="User.MiddleName" class="field-validation-error"></span>
+
+                <input asp-for="User.LastName" class="form-control mt-2"
+                       placeholder="Last Name (required)" required
+                       data-val="true"
+                       data-val-required="Last name is required"
+                       data-val-regex="Only letters and spaces allowed"
+                       data-val-regex-pattern="^[A-Za-z\s]{2,50}$" />
+                <span asp-validation-for="User.LastName" class="field-validation-error"></span>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="mb-3">
+                <label class="form-label fw-bold">Contact Information</label>
+
+                <input asp-for="User.ContactNumber" class="form-control"
+                       placeholder="Mobile Number (09XXXXXXXXX)"
+                       required
+                       data-val="true"
+                       data-val-required="Mobile number is required"
+                       data-val-regex="Please enter a valid 11-digit mobile number starting with 09"
+                       data-val-regex-pattern="^09\d{9}$"
+                       maxlength="11"
+                       oninput="validatePhilippineNumber(this)" />
+                <div class="input-hint">Format: 09123456789 (11 digits)</div>
+                <span asp-validation-for="User.ContactNumber" class="field-validation-error"></span>
+                <span id="ContactNumberError" class="text-danger"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 mt-3" id="submitButton">
+                <i class="fas fa-user-plus me-2"></i> Register Now
+            </button>
+
+            <!-- Back to Kiosk Home Link -->
+            <div class="text-center mt-3">
+                <a href="@Url.Action("KioskHome", "Kiosk")" class="btn btn-secondary w-100">
+                    <i class="fas fa-arrow-left me-2"></i> Back to Kiosk Home
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Fade in on page load
+        $(document).ready(function() {
+            $("body").css("display", "none");
+            $("body").fadeIn(250);
+
+            // Initialize form validation
+            $.validator.setDefaults({
+                ignore: []
+            });
+        });
+
+        // Validate Philippine mobile number format (09XXXXXXXXX)
+        function validatePhilippineNumber(input) {
+            // Remove non-numeric characters
+            input.value = input.value.replace(/[^0-9]/g, '');
+
+            // Limit to 11 digits
+            if (input.value.length > 11) {
+                input.value = input.value.slice(0, 11);
+            }
+
+            // Validate format
+            const isValid = /^09\d{9}$/.test(input.value);
+            const errorSpan = document.getElementById('ContactNumberError');
+
+            if (input.value && !isValid) {
+                input.classList.add('is-invalid');
+                if (errorSpan) {
+                    errorSpan.textContent = 'Please enter a valid Philippine mobile number (09XXXXXXXXX)';
+                }
+            } else {
+                input.classList.remove('is-invalid');
+                if (errorSpan) {
+                    errorSpan.textContent = '';
+                }
+            }
+        }
+
+        // Combined image validation and preview function
+        function validateAndPreviewImage(event) {
+            const input = event.target;
+            const preview = document.getElementById("profilePreview");
+            const validationMessage = document.querySelector("[data-valmsg-for='ProfilePictureFile']");
+            const file = input.files[0];
+
+            if (!file) {
+                preview.src = '/images/default.png';
+                return;
+            }
+
+            // Validate file type
+            const validTypes = ['image/jpeg', 'image/png'];
+            if (!validTypes.includes(file.type.toLowerCase())) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid File Type',
+                    text: 'Only JPG and PNG images are allowed.'
+                });
+                input.value = '';
+                preview.src = '/images/default.png';
+                if (validationMessage) {
+                    validationMessage.textContent = 'Only JPG/PNG images are allowed';
+                }
+                return;
+            }
+
+            // Validate file size (2MB)
+            const maxSize = 2 * 1024 * 1024; // 2MB
+            if (file.size > maxSize) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'File Too Large',
+                    text: 'Maximum file size is 2MB.'
+                });
+                input.value = '';
+                preview.src = '/images/default.png';
+                if (validationMessage) {
+                    validationMessage.textContent = 'Image must be less than 2MB';
+                }
+                return;
+            }
+
+            // Preview image if valid
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+                if (validationMessage) {
+                    validationMessage.textContent = '';
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Contact number duplicate checking
+        $('#User_ContactNumber').on('blur', async function() {
+            const input = $(this);
+            const number = input.val();
+            const errorSpan = $('#ContactNumberError');
+
+            if (number && /^09\d{9}$/.test(number)) {
+                try {
+                    const response = await fetch(`/Authentication/CheckContactNumber?contact=${encodeURIComponent(number)}`);
+                    const data = await response.json();
+
+                    if (!data.isUnique) {
+                        input.addClass('is-invalid');
+                        errorSpan.text('This contact number is already registered.').show();
+                    } else {
+                        input.removeClass('is-invalid');
+                        errorSpan.text('').hide();
+                    }
+                } catch (error) {
+                    console.error('Error checking contact number:', error);
+                    errorSpan.text('Could not verify contact number. Please try again.').show();
+                }
+            }
+        });
+
+        // Form submission handler
+        $('#kioskRegistrationForm').on('submit', async function(e) {
+            e.preventDefault();
+            const $form = $(this);
+            const $btn = $('#submitButton');
+
+            // Disable button and show loading state
+            $btn.prop('disabled', true);
+            $btn.html('<span class="spinner-border spinner-border-sm me-2"></span>Creating Account...');
+
+            // Validate form
+            if (!$form.valid()) {
+                $btn.prop('disabled', false);
+                $btn.html('<i class="fas fa-user-plus me-2"></i> Register Now');
+                return;
+            }
+
+            // Check for duplicate contact number
+            const contactNumber = $('#User_ContactNumber').val();
+            if (contactNumber) {
+                try {
+                    const response = await fetch(`/Authentication/CheckContactNumber?contact=${encodeURIComponent(contactNumber)}`);
+                    const data = await response.json();
+
+                    if (!data.isUnique) {
+                        $('#User_ContactNumber').addClass('is-invalid');
+                        $('#ContactNumberError').text('This contact number is already registered.').show();
+                        $btn.prop('disabled', false);
+                        $btn.html('<i class="fas fa-user-plus me-2"></i> Register Now');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking contact number:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Could not verify contact number. Please try again.'
+                    });
+                    $btn.prop('disabled', false);
+                    $btn.html('<i class="fas fa-user-plus me-2"></i> Register Now');
+                    return;
+                }
+            }
+
+            // If all validations pass, submit the form
+            try {
+                const formData = new FormData($form[0]);
+                const response = await fetch($form.attr('action'), {
+                    method: $form.attr('method'),
+                    body: formData,
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    }
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Show success message and redirect
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Registration Successful!',
+                        text: result.message || 'Your account has been created successfully.',
+                        confirmButtonText: 'Continue'
+                    });
+                    window.location.href = '@Url.Action("KioskHome", "Kiosk")';
+                } else {
+                    // Show error messages
+                    if (result.messages && Array.isArray(result.messages)) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Registration Failed',
+                            html: result.messages.join('<br>')
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Registration Failed',
+                            text: result.message || 'An error occurred during registration. Please try again.'
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Registration Failed',
+                    text: 'An error occurred during registration. Please try again.'
+                });
+            } finally {
+                $btn.prop('disabled', false);
+                $btn.html('<i class="fas fa-user-plus me-2"></i> Register Now');
+            }
+        });
+    </script>
+</body>
+</html>
