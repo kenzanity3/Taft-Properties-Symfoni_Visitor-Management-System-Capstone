@@ -1,0 +1,564 @@
+﻿/* ========== GLOBAL STYLES ========== */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: url("/images/symfoninichols.jpg") no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+}
+
+.header-bar {
+    width: 100%;
+    background-color: #1A2C4E;
+    color: #fff;
+    padding: 0.75rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    box-sizing: border-box;
+}
+
+.header-logo {
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+    .header-logo img {
+        height: 40px;
+        width: 40px;
+        margin-right: 10px;
+    }
+
+.header-title {
+    font-size: 1.1rem;
+    font-weight: bold;
+    line-height: 1.2;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.login-btn {
+    background: #324c72;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 22px;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 160px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    .login-btn:hover {
+        background: #415E72;
+        color: #fff;
+        text-decoration: none;
+    }
+
+.kiosk-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+    .kiosk-btn:hover {
+        background-color: #5a6268;
+        color: white;
+    }
+
+.overlay {
+    background: rgba(255, 255, 255, 0.88);
+    padding: 40px;
+    border-radius: 20px;
+    margin: 60px auto;
+    max-width: 1000px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-section {
+    background: linear-gradient(to right, #1a2c4e, #415E72);
+    padding: 40px;
+    border-radius: 16px;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+    font-size: 0.85em;
+    padding: 0.35em 0.65em;
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+/* Style for masked contact numbers */
+.contact-masked {
+    font-family: monospace;
+    letter-spacing: 0.1em;
+}
+/* Card columns fix */
+.card-row {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.card-tile {
+    background: #fff;
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    flex: 1 1 320px;
+    min-width: 280px;
+    max-width: 400px;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+    .card-tile:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-tile i {
+        font-size: 3rem;
+        color: #1a2c4e;
+        margin-bottom: 15px;
+    }
+
+.btn-tile {
+    margin-top: 15px;
+    padding: 10px 24px;
+    background-color: #1a2c4e;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    display: inline-block;
+    min-width: 120px;
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+    .btn-tile.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+    }
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #003049;
+    margin: 40px 0 20px;
+}
+
+.card-body {
+    background-color: #fff;
+    padding: 20px 25px;
+    border-radius: 16px;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+    margin-bottom: 20px;
+}
+
+.badge {
+    font-size: 1rem;
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.qr-code {
+    text-align: center;
+    margin-top: 20px;
+}
+
+    .qr-code img {
+        max-width: 200px;
+        border: 5px solid #1a2c4e;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+.search-section {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.search-input {
+    width: 300px;
+    max-width: 90%;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.search-result {
+    margin-top: 10px;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+/* Add these styles to your Home.css */
+#searchLoading {
+    transition: all 0.3s ease;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+    border-width: 0.25em;
+}
+
+/* Optional: Add animation for smoother transitions */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+#searchLoading p {
+    animation: fadeIn 0.3s ease;
+    color: #1a2c4e;
+    font-weight: 500;
+}
+
+#resultsCard {
+    animation: fadeIn 0.5s ease;
+}
+
+.no-appointments {
+    padding: 2rem;
+    text-align: center;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+    .no-appointments i {
+        font-size: 2.5rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    .no-appointments h5 {
+        color: #495057;
+        margin-bottom: 0.5rem;
+    }
+
+    .no-appointments p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+.icon-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.status-badge {
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.status-pending {
+    background-color: #FFF3CD;
+    color: #856404;
+}
+
+.status-approved {
+    background-color: #D1E7DD;
+    color: #0F5132;
+}
+
+.status-denied {
+    background-color: #F8D7DA;
+    color: #842029;
+}
+
+.action-btn {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    margin: 0 3px;
+}
+/* ========== ANIMATIONS ========== */
+/* ========== ANIMATIONS ========== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    70% {
+        transform: scale(0.9);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Animation classes */
+.animate-fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.animate-slide-in-right {
+    animation: slideInRight 0.7s ease-out forwards;
+}
+
+.animate-pulse {
+    animation: pulse 2s infinite;
+}
+
+.animate-bounce-in {
+    animation: bounceIn 0.8s ease-out forwards;
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.5s ease-out forwards;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.5s ease-out forwards;
+}
+
+/* Add these to ensure icons are visible */
+.fas, .fa {
+    display: inline-block;
+}
+
+/* Ensure background loads properly */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+/* Loading state for buttons */
+.btn-loading {
+    position: relative;
+    color: transparent !important;
+    pointer-events: none;
+}
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-right-color: transparent;
+        animation: spinner-border 0.75s linear infinite;
+    }
+
+/* Additional animation for smooth transitions */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.animate-fade-out {
+    animation: fadeOut 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.5s ease-out;
+}
+
+/* Staggered animation delays */
+.animate-delay-1 {
+    animation-delay: 0.1s;
+}
+
+.animate-delay-2 {
+    animation-delay: 0.2s;
+}
+
+.animate-delay-3 {
+    animation-delay: 0.3s;
+}
+
+.animate-delay-4 {
+    animation-delay: 0.4s;
+}
+
+.animate-delay-5 {
+    animation-delay: 0.5s;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Focus states for accessibility */
+.btn:focus, .form-control:focus {
+    animation: pulse 0.5s ease;
+}
+
+@media (max-width: 900px) {
+    .card-row {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .card-tile {
+        max-width: 100%;
+    }
+
+    .header-bar {
+        padding: 0.75rem 1rem;
+    }
+}

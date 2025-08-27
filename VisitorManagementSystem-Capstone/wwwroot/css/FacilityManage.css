@@ -1,0 +1,82 @@
+﻿body {
+    background-color: #f4f6f9;
+}
+
+h2 {
+    color: #1A2C4E;
+    font-weight: bold;
+}
+
+.btn-add,
+.btn-refresh {
+    border-radius: 8px;
+    padding: 10px 20px;
+    color: white;
+    transition: 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-add {
+    background-color: #1A2C4E;
+}
+
+.btn-refresh {
+    background-color: #6c757d;
+    margin-right: 10px;
+}
+
+.btn-add:hover {
+    background-color: #324c72;
+}
+
+.btn-refresh:hover {
+    background-color: #5a6268;
+}
+
+.facility-wrapper {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.table th, .table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table thead th {
+    background-color: #1A2C4E !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+.table thead {
+    background-color: #1A2C4E;
+    color: white;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 6px;
+}
+
+.modal-header {
+    background-color: #1A2C4E;
+    color: white;
+}
+
+.modal-footer .btn {
+    border-radius: 8px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #1A2C4E;
+}
+
+.form-control,
+.form-select {
+    border-radius: 8px;
+}

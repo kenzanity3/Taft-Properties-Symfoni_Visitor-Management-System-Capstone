@@ -1,0 +1,714 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.ForgotContactKioskViewModel
+@{
+    ViewBag.Title = "Visitor Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/StaffDashboard.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.css">
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="dashboard-header">
+            <i class="fa-solid fa-user-plus me-2"></i> Visitor Approval Management
+        </h2>
+        <div>
+            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#visitorModal">
+                <i class="fa-solid fa-plus-circle me-2"></i> Create Visitor Request
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card bg-primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalVisitors">0</h3>
+                    <p>Total Visitors Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="checkedInVisitors">0</h3>
+                    <p>Checked In</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="pendingVisitors">0</h3>
+                    <p>Pending Approval</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="checkedOutVisitors">0</h3>
+                    <p>Checked Out</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visitors Table -->
+    <div class="card card-modern mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-walking me-2"></i> Today's Visitors
+            </h5>
+            <button class="btn btn-sm btn-outline-primary" onclick="refreshVisitors()">
+                <i class="fa-solid fa-refresh"></i> Refresh
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Photo</th>
+                            <th>Visitor Name</th>
+                            <th>Contact Number</th>
+                            <th>Tower</th>
+                            <th>Room No.</th>
+                            <th>Room Owner</th>
+                            <th>Appointment Status</th>
+                            <th>Check-in Status</th>
+                            <th>Purpose</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="visitorsTable">
+                        <!-- Content will be populated via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Visitor Request Modal -->
+<div class="modal fade" id="visitorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Visitor Request</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="visitorForm" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <!-- Left Column - Profile Picture -->
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="profile-picture-container mb-3">
+                                    <img id="profilePreview" src="/images/default.png"
+                                         class="profile-picture-preview"
+                                         alt="Profile Preview">
+                                    <div class="profile-actions mt-2">
+                                        <!-- Hidden file input -->
+                                        <input type="file" id="profileUpload" accept="image/*"
+                                               class="d-none" name="ProfilePicture">
+
+                                        <!-- Upload button (triggers input) -->
+                                        <button type="button" id="profileUploadBtn" class="btn btn-sm btn-outline-primary me-2"
+                                                onclick="document.getElementById('profileUpload').click()">
+                                            <i class="fa-solid fa-upload"></i> Upload
+                                        </button>
+
+                                        <button type="button" id="takePic" class="btn btn-sm btn-outline-info"
+                                                onclick="openCamera()">
+                                            <i class="fa-solid fa-camera"></i> Camera
+                                        </button>
+                                    </div>
+                                    <div class="text-muted small mt-2">Max 2MB (JPG/PNG)</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column - Form Fields -->
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label class="form-label">Visitor Full Name *</label>
+                                <input type="text" class="form-control" name="VisitorFullName" id="VisitorFullName" required>
+                            </div>
+                            <button type="button" class="btn-auth" onclick="CheckExistingVisitor()">Check visitor exist</button>
+                            <select id="existingvisitorcontact" name="existingvisitorcontact" class="form-select" hidden>
+
+                            </select>
+                            <div class="mb-3">
+                                <label class="form-label">Tower *</label>
+                                <select name="Tower" id="Tower" class="form-control" required>
+                                    <option value="" selected disabled>--select--</option>
+                                    <option value="Alto">Alto</option>
+                                    <option value="Bossa">Bossa</option>
+                                </select>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Room Number *</label>
+                                        <input type="text" class="form-control" id="RoomNumber" name="RoomNumber" required>
+                                        <div class="invalid-feedback" id="roomNumberFeedback"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Room Owner Name</label>
+                                        <input type="text" class="form-control" id="RoomOwnerName" name="RoomOwnerName" readonly>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Contact Number</label>
+                                <input type="tel" class="form-control" name="ContactNumber" id="ContactNumber"
+                                       placeholder="Optional for visitors without contact">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Purpose of Visit *</label>
+                                <select class="form-select mb-3" id="PurposeDropdown" onchange="updatePurposeFromDropdown()" required>
+                                    <option value="">-- Select a purpose --</option>
+                                    <option value="Personal Visit">Personal Visit</option>
+                                    <option value="Delivery">Delivery</option>
+                                    <option value="Maintenance">Maintenance</option>
+                                    <option value="Meeting">Meeting</option>
+                                    <option value="Other">Other (specify below)</option>
+                                </select>
+
+                                <textarea class="form-control" id="PurposeOfVisit" name="PurposeOfVisit" rows="3"
+                                          maxlength="1000" placeholder="Describe your visit purpose..."
+                                          required oninput="updateWordCount(this.value.length)"></textarea>
+
+                                <div class="word-count" id="wordCount">0 / 1000 characters</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitVisitorForm()">Submit Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Camera Modal -->
+<div class="modal fade" id="cameraModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Take Profile Picture</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" onclick="closeCamera()"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div id="cameraView" style="width: 100%; height: 300px;"></div>
+                <div class="mt-3">
+                    <button class="btn btn-primary" onclick="capturePhoto()">
+                        <i class="fa-solid fa-camera me-2"></i> Capture
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+// Replace the entire script section with this cleaned-up version
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let cameraActive = false;
+
+        $(document).ready(function() {
+            refreshVisitors();
+            updateStats();
+
+            // Room number validation
+            $('#RoomNumber').on('input', function() {
+                const tower = $('#Tower').val();
+                const roomNumber = $(this).val();
+
+                $(this).removeClass('is-invalid is-valid');
+                $('#roomNumberFeedback').text('').removeClass('text-danger text-success');
+                $('#RoomOwnerName').val('');
+
+                if (tower && roomNumber.length >= 2) {
+                    validateRoomNumber(tower, roomNumber);
+                }
+            });
+
+            // Tower selection change
+            $('#Tower').on('change', function() {
+                const tower = $(this).val();
+                const roomNumber = $('#RoomNumber').val();
+
+                if (tower && roomNumber.length > 2) {
+                    validateRoomNumber(tower, roomNumber);
+                }
+            });
+
+         // Profile picture upload preview
+            $('#profileUpload').change(function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file size (2MB)
+                    if (file.size > 2 * 1024 * 1024) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'File Too Large',
+                            text: 'Maximum file size is 2MB.'
+                        });
+                        $(this).val('');
+                        $('#profilePreview').attr('src', '/images/default.png');
+                        return;
+                    }
+
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/png'];
+                    if (!validTypes.includes(file.type.toLowerCase())) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Invalid File Type',
+                            text: 'Only JPG and PNG images are allowed.'
+                        });
+                        $(this).val('');
+                        $('#profilePreview').attr('src', '/images/default.png');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        $('#profilePreview').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+
+
+
+            // Handle camera modal close event
+            $('#cameraModal').on('hidden.bs.modal', function() {
+                closeCamera();
+            });
+        });
+             function CheckExistingVisitor() {
+            let fullName = $('#VisitorFullName').val();
+
+            $.ajax({
+                url: '/RequestVisitorApproval/CheckVisitorExistingName',
+                type: 'GET',
+                data: { fullName: fullName },
+                success: function (data) {
+                    if (data.success && Array.isArray(data.contactnumbers) && data.contactnumbers.length > 0) {
+                        let $select = $('#existingvisitorcontact');
+                        $select.empty(); // clear old options
+
+                        // Add a default option
+                        $select.append('<option value="" disabled selected>-- Select contact number --</option>');
+
+                        // Populate with contact numbers
+                        data.contactnumbers.forEach(function (con) {
+                            $select.append($('<option></option>').val(con).text(con));
+                        });
+
+                        $select.removeAttr('hidden');
+                    } else {
+                        resetVisitorForm();
+                    }
+                },
+                error: function () {
+                    console.error('Failed to check existing visitor');
+                    resetVisitorForm();
+                }
+            });
+        }
+
+        // When selecting a contact, fetch details
+        $('#existingvisitorcontact').on('change', function () {
+            const contactNumber = $(this).val();
+            $('#ContactNumber').val(contactNumber);
+            fetchVisitorDetails(contactNumber);
+        });
+
+        function fetchVisitorDetails(contactNumber) {
+            $.ajax({
+                url: '/RequestVisitorApproval/fetchVisitorDetails',
+                type: 'GET',
+                data: { contactnumber: contactNumber },
+                success: function (data) {
+                    if (data.success) {
+                        var profileImage = data.profilePicture && data.profilePicture.trim() !== ""
+                            ? data.profilePicture
+                            : '/images/default.png';
+
+                              // Handle profile preview properly
+                    if (data.profilePicture) {
+                        $('#profilePreview').attr('src', data.profilePicture);
+                         // Convert image URL to File object and assign to input
+                        fetch(profileImage)
+                            .then(res => res.blob())
+                            .then(blob => {
+                                const file = new File([blob], 'profile.jpg', { type: blob.type });
+                                const dataTransfer = new DataTransfer();
+                                dataTransfer.items.add(file);
+                                document.getElementById('profileUpload').files = dataTransfer.files;
+                            });
+
+                        // Hide file upload and camera
+                        $('#profileUploadBtn').hide();
+                        $('#takePic').hide();
+
+                        // Disable input and set value
+                        $('#ContactNumber').prop('readonly', true).val(contactNumber);
+                    } else {
+                        resetVisitorForm();
+                    }
+
+
+
+                    } else {
+                        resetVisitorForm();
+                    }
+                },
+                error: function () {
+                    resetVisitorForm();
+                }
+            });
+        }
+
+        // Reset visitor form if not found or failed
+        function resetVisitorForm() {
+            $('#profilePreview').attr('src', '/images/default.png');
+            $('#profileUploadBtn').show();
+            $('#profileUpload').val('');
+            $('#takePic').show();
+            $('#ContactNumber').prop('readonly', false).val('');
+            $('#existingvisitorcontact').attr('hidden', true).empty();
+        }
+
+        function validateRoomNumber(tower, roomNumber) {
+            $.ajax({
+                url: '/RequestVisitorApproval/GetRoomOwner',
+                type: 'GET',
+                data: {
+                    roomNumber: roomNumber,
+                    tower: tower
+                },
+                success: function(data) {
+                    if (data.success) {
+                        $('#RoomOwnerName').val(data.roomOwnerName);
+                        $('#RoomNumber').removeClass('is-invalid').addClass('is-valid');
+                        $('#roomNumberFeedback').text('Room verified').addClass('text-success');
+                    } else {
+                        $('#RoomOwnerName').val('');
+                        $('#RoomNumber').removeClass('is-valid').addClass('is-invalid');
+                        $('#roomNumberFeedback').text(data.message || 'Room not found or has no active owner').addClass('text-danger');
+                    }
+                },
+                error: function() {
+                    $('#RoomOwnerName').val('');
+                    $('#RoomNumber').removeClass('is-valid').addClass('is-invalid');
+                    $('#roomNumberFeedback').text('Error validating room number').addClass('text-danger');
+                }
+            });
+        }
+
+        function refreshVisitors() {
+            $.ajax({
+                url: '/RequestVisitorApproval/GetWalkInVisitors',
+                type: 'GET',
+                success: function(data) {
+                    $('#visitorsTable').html(data);
+                    updateStats();
+                },
+                error: function() {
+                    console.error('Failed to load visitors');
+                }
+            });
+        }
+
+        function updateStats() {
+            const total = $('.visitor-row').length;
+            const checkedIn = $('.badge.bg-info:contains("Checked In")').length;
+            const pending = $('.badge.bg-warning').length;
+            const checkedOut = $('.badge.bg-secondary:contains("Checked Out")').length;
+
+            $('#totalVisitors').text(total);
+            $('#checkedInVisitors').text(checkedIn);
+            $('#pendingVisitors').text(pending);
+            $('#checkedOutVisitors').text(checkedOut);
+        }
+
+            function submitVisitorForm() {
+                const formData = new FormData(document.getElementById('visitorForm'));
+
+                // Validate required fields
+                if (!formData.get('VisitorFullName') || !formData.get('Tower') ||
+                    !formData.get('RoomNumber') || !formData.get('PurposeOfVisit')) {
+                    Swal.fire('Error', 'Please fill all required fields.', 'error');
+                    return;
+                }
+
+                // Validate room number
+                if ($('#RoomNumber').hasClass('is-invalid')) {
+                    Swal.fire('Error', 'Please enter a valid room number with an active owner.', 'error');
+                    return;
+                }
+
+                Swal.fire({
+                    title: 'Submitting Request',
+                    text: 'Please wait...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                $.ajax({
+                    url: '/RequestVisitorApproval/RequestApproval',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        Swal.close();
+                        if (response.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success!',
+                                HTML: response.message,
+                                timer: 5000,
+                                showConfirmButton: true
+                            }).then(() => {
+                                $('#visitorModal').modal('hide');
+                                document.getElementById('visitorForm').reset();
+                                $('#RoomOwnerName').val('');
+                                $('#wordCount').text('0 / 1000 characters');
+                                resetVisitorForm();
+                                refreshVisitors();
+                            });
+                        } else {
+                            if (response.errors && response.errors.length > 0) {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Validation Error',
+                                    html: response.message + '<br><br>' + response.errors.join('<br>')
+                                });
+                            } else {
+                                Swal.fire('Error', response.message, 'error');
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.close();
+                        if (xhr.status === 400) {
+                            try {
+                                const response = JSON.parse(xhr.responseText);
+                                if (response.errors) {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Validation Error',
+                                        html: response.errors.join('<br>')
+                                    });
+                                } else {
+                                    Swal.fire('Error', response.message || 'Invalid request data', 'error');
+                                }
+                            } catch (e) {
+                                Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                            }
+                        } else {
+                            Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                        }
+                    }
+                });
+            }
+
+        // Add event listeners for check-in/check-out buttons
+        $(document).on('click', '.checkin-btn', function() {
+            const visitLogId = $(this).data('visitlogid');
+            const visitorName = $(this).data('visitorname');
+            checkInVisitor(visitLogId, visitorName);
+        });
+
+        $(document).on('click', '.checkout-btn', function() {
+            const visitLogId = $(this).data('visitlogid');
+            const visitorName = $(this).data('visitorname');
+            checkOutVisitor(visitLogId, visitorName);
+        });
+
+        function checkInVisitor(visitLogId, visitorName) {
+            Swal.fire({
+                title: 'Check In Visitor',
+                text: `Are you sure you want to check in ${visitorName}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Check In',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/RequestVisitorApproval/CheckInVisitor',
+                        type: 'POST',
+                        data: { visitLogId: visitLogId },
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: response.message
+                                }).then(() => {
+                                    refreshVisitors();
+                                });
+                            } else {
+                                Swal.fire('Error', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        function checkOutVisitor(visitLogId, visitorName) {
+            Swal.fire({
+                title: 'Check Out Visitor',
+                text: `Are you sure you want to check out ${visitorName}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Check Out',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/RequestVisitorApproval/CheckOutVisitor',
+                        type: 'POST',
+                        data: { visitLogId: visitLogId },
+                        headers: {
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Success!',
+                                    text: response.message
+                                }).then(() => {
+                                    refreshVisitors();
+                                });
+                            } else {
+                                Swal.fire('Error', response.message, 'error');
+                            }
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error', 'An error occurred: ' + xhr.statusText, 'error');
+                        }
+                    });
+                }
+            });
+        }
+
+        // Camera functions
+        function openCamera() {
+            $('#cameraModal').modal('show');
+            setTimeout(() => {
+                Webcam.set({
+                    width: 320,
+                    height: 240,
+                    image_format: 'jpeg',
+                    jpeg_quality: 90
+                });
+                Webcam.attach('#cameraView');
+                cameraActive = true;
+            }, 500);
+        }
+
+        function closeCamera() {
+            if (cameraActive) {
+                Webcam.reset();
+                cameraActive = false;
+            }
+        }
+
+        function capturePhoto() {
+            Webcam.snap(function(data_uri) {
+                $('#profilePreview').attr('src', data_uri);
+                const blob = dataURItoBlob(data_uri);
+                const file = new File([blob], 'profile.jpg', { type: 'image/jpeg' });
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('profileUpload').files = dataTransfer.files;
+                $('#cameraModal').modal('hide');
+                closeCamera();
+            });
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
+
+        // Purpose of visit functions
+        function updatePurposeFromDropdown() {
+            const dropdown = document.getElementById("PurposeDropdown");
+            const textarea = document.getElementById("PurposeOfVisit");
+            if (dropdown.value === "Other") {
+                textarea.value = "";
+                textarea.focus();
+                textarea.dataset.userEdited = "true";
+            } else if (dropdown.value) {
+                textarea.value = dropdown.value;
+                textarea.dataset.userEdited = "";
+            }
+            updateWordCount(textarea.value.length);
+        }
+
+        function updateWordCount(count) {
+            const wordCountElement = document.getElementById("wordCount");
+            wordCountElement.textContent = `${count} / 1000 characters`;
+            if (count > 900) {
+                wordCountElement.classList.add('text-warning');
+                wordCountElement.classList.remove('text-danger');
+            } else if (count > 1000) {
+                wordCountElement.classList.add('text-danger');
+                wordCountElement.classList.remove('text-warning');
+            } else {
+                wordCountElement.classList.remove('text-warning', 'text-danger');
+            }
+        }
+    </script>
+}

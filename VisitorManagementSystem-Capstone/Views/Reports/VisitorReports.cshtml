@@ -1,0 +1,266 @@
+﻿@{
+    ViewBag.Title = "Visitor Reports";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body {
+        background: #f4f7fa;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    /* Summary Cards */
+    .summary-card {
+        border-radius: 20px;
+        padding: 25px;
+        color: #fff;
+        text-align: center;
+        transition: transform 0.2s ease-in-out;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-card h4 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .summary-card p {
+            margin: 5px 0 0;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+    /* Only 2 main colors: Blue + Green */
+    .bg-theme-blue {
+        background: linear-gradient(135deg, #1A2C4E, #1A2C4E);
+    }
+
+    .bg-theme-green {
+        background: linear-gradient(135deg, #1A2C4E, #1A2C4E);
+    }
+
+    /* Report Sections */
+    .report-section {
+        margin-top: 30px;
+        background: #fff;
+        padding: 25px;
+        border-radius: 20px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .table thead {
+        background: #f1f3f5;
+    }
+
+    .table th {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+        transition: background-color 0.2s ease;
+    }
+
+    /* Chart container */
+    #visitorChart {
+        background-color: #fff;
+        border-radius: 12px;
+        padding: 10px;
+    }
+
+    /* Buttons - only 2 theme colors */
+    .btn-approve {
+        background-color: #2ecc71;
+        border: none;
+        color: #fff;
+    }
+
+        .btn-approve:hover {
+            background-color: #27ae60;
+        }
+
+    .btn-decline {
+        background-color: #e74c3c;
+        border: none;
+        color: #fff;
+    }
+
+        .btn-decline:hover {
+            background-color: #c0392b;
+        }
+
+    .btn-details {
+        background-color: #2196f3;
+        border: none;
+        color: #fff;
+    }
+
+        .btn-details:hover {
+            background-color: #1976d2;
+        }
+    .report-wrapper {
+        padding: 40px 25px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .report-header h2 {
+        color: #1A2C4E;
+        font-weight: bold;
+    }
+
+    .summary-cards {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+
+    .summary-card {
+        flex: 1;
+        min-width: 200px;
+        background: #1A2C4E;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        text-align: center;
+    }
+
+        .summary-card h5,
+        .summary-card span {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .summary-card span {
+            font-size: 1.5rem;
+        }
+
+    thead th {
+        background-color: #1A2C4E;
+        color: #ffffff;
+        text-align: center;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .btn-custom {
+        border-radius: 8px;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="report-wrapper">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center report-header mb-4">
+            <h2>📊 Visitor Visits Report</h2>
+            <div class="d-flex gap-2">
+                <button onclick="location.reload()" class="btn btn-dark btn-custom">🔁 Refresh</button>
+                <button class="btn btn-success btn-custom">⬇️ Export</button>
+            </div>
+        </div>
+        <!-- Summary Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="summary-card bg-theme-blue">
+                    <i class="fa-solid fa-bed"></i>
+                    <h4>120</h4>
+                    <p>Visitors Today</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card bg-theme-green">
+                    <i class="fa-solid fa-users"></i>
+                    <h4>530</h4>
+                    <p>This Week</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card bg-theme-blue">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <h4>2,400</h4>
+                    <p>This Month</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="summary-card bg-theme-green">
+                    <i class="fa-solid fa-coins"></i>
+                    <h4>18,700</h4>
+                    <p>This Year</p>
+                </div>
+            </div>
+        </div>
+        <!-- Visitor Chart -->
+        <div class="report-section">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0"><i class="fa-solid fa-users me-2 text-primary"></i> Monthly Visitor Report</h5>
+                <select class="form-select w-auto">
+                    <option>Monthly</option>
+                    <option>Weekly</option>
+                    <option>Daily</option>
+                    <option>Yearly</option>
+                </select>
+            </div>
+            <canvas id="visitorChart" height="90"></canvas>
+        </div>
+
+
+        <!-- Table -->
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped shadow-sm bg-white rounded">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Facility</th>
+                        <th>User</th>
+                        <th>Time In</th>
+                        <th>Time Out</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>2025-07-12</td>
+                        <td>Swimming Pool</td>
+                        <td>Juan Dela Cruz</td>
+                        <td>08:00 AM</td>
+                        <td>10:00 AM</td>
+                        <td><span class="badge bg-success">Completed</span></td>
+                    </tr>
+                    <tr>
+                        <td>2025-07-12</td>
+                        <td>Gym Room</td>
+                        <td>Maria Santos</td>
+                        <td>09:30 AM</td>
+                        <td>--</td>
+                        <td><span class="badge bg-warning text-dark">Ongoing</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Facility Usage Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .report-wrapper {
+        padding: 40px 25px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .report-header h2 {
+        color: #1A2C4E;
+        font-weight: bold;
+    }
+
+    .summary-cards {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+    }
+
+    .summary-card {
+        flex: 1;
+        min-width: 200px;
+        background: #1A2C4E;
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+        text-align: center;
+    }
+
+        .summary-card h5,
+        .summary-card span {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .summary-card span {
+            font-size: 1.5rem;
+        }
+
+    thead th {
+        background-color: #1A2C4E;
+        color: #ffffff;
+        text-align: center;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    .btn-custom {
+        border-radius: 8px;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="report-wrapper">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center report-header mb-4">
+            <h2>📊 Facility Usage Report</h2>
+            <div class="d-flex gap-2">
+                <button onclick="location.reload()" class="btn btn-dark btn-custom">🔁 Refresh</button>
+                <button class="btn btn-success btn-custom">⬇️ Export</button>
+            </div>
+        </div>
+
+        <!-- Facility Usage -->
+        <div class="report-section mt-4">
+            <h5 class="mb-3"><i class="fa-solid fa-building me-2 text-success"></i> Facility Usage Report</h5>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th>Facility</th>
+                            <th>User</th>
+                            <th>Date</th>
+                            <th>Duration</th>
+                            <th>Report Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>🏊 Swimming Pool</td>
+                            <td>Ana Santos</td>
+                            <td>Aug 15, 2025</td>
+                            <td>2 hrs</td>
+                            <td>Daily</td>
+                        </tr>
+                        <tr>
+                            <td>🎉 Function Hall</td>
+                            <td>Mark Reyes</td>
+                            <td>Aug 14, 2025</td>
+                            <td>5 hrs</td>
+                            <td>Weekly</td>
+                        </tr>
+                        <tr>
+                            <td>💪 Gym</td>
+                            <td>Lisa Tan</td>
+                            <td>Aug 01–31, 2025</td>
+                            <td>15 hrs</td>
+                            <td>Monthly</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>

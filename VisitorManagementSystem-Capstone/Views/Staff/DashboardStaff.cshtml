@@ -1,0 +1,99 @@
+﻿@using VisitorManagementSystem_Capstone.ViewModels
+@model ForgotContactKioskViewModel
+@{
+    ViewBag.Title = "Staff Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/css/StaffDashboard.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.css">
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="dashboard-header">
+            <i class="fa-solid fa-user-tie me-2"></i> Staff Dashboard
+        </h2>
+        <button class="btn btn-primary btn-lg" onclick="location.href='@Url.Action("RequestVisitorApproval", "RequestVisitorApproval")'">
+            <i class="fa-solid fa-plus-circle me-2"></i> Request Approval
+        </button>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card bg-primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalVisitors">0</h3>
+                    <p>Total Visitors Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card bg-success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="approvedVisitors">0</h3>
+                    <p>Approved Visitors</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card bg-warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="pendingVisitors">0</h3>
+                    <p>Pending Approval</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.26/webcam.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            // Auto-refresh every 30 seconds
+            setInterval(refreshVisitors, 30000);
+            updateStats();
+
+            // Room number autocomplete
+            $('input[name="RoomNumber"]').on('input', function() {
+                const roomNumber = $(this).val();
+                if (roomNumber.length > 2) {
+                    $.get('/Staff/GetRoomOwner?roomNumber=' + roomNumber, function(data) {
+                        if (data.success) {
+                            $('#roomOwnerName').val(data.roomOwnerName);
+                        } else {
+                            $('#roomOwnerName').val('Not found');
+                        }
+                    });
+                }
+            });
+
+            function refreshVisitors() {
+                $.get('/Staff/GetWalkInVisitors', function(data) {
+                    $('#visitorsTable').html(data);
+                    updateStats();
+                });
+            }
+
+            function updateStats() {
+                const total = $('.visitor-row').length;
+                const approved = $('.badge.bg-success').length;
+                const pending = $('.badge.bg-warning').length;
+
+                $('#totalVisitors').text(total);
+                $('#approvedVisitors').text(approved);
+                $('#pendingVisitors').text(pending);
+            }
+        });
+    </script>
+}

@@ -1,0 +1,64 @@
+﻿@{
+    ViewBag.Title = "Assign Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-wrapper {
+        max-width: 600px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #1A2C4E;
+    }
+
+    h2 {
+        color: #1A2C4E;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .btn-primary {
+        background-color: #1A2C4E;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+
+        .btn-primary:hover {
+            background-color: #324c72;
+        }
+</style>
+
+<div class="container mt-5">
+    <div class="form-wrapper">
+        <h2>👤 Assign Admin Role</h2>
+
+        <form method="post" asp-action="AssignAdmin">
+            <div class="mb-3">
+                <label for="UserId" class="form-label">Select User</label>
+                <select name="UserId" class="form-select" required>
+                    <option value="">-- Choose a User --</option>
+                    @* Replace with dynamic list *@
+                    <option value="1">john_doe@example.com</option>
+                    <option value="2">mary_admin@example.com</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="UnitAssigned" class="form-label">Assign to Unit/Room</label>
+                <input type="text" name="UnitAssigned" class="form-control" placeholder="e.g., Room 101" required />
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">✅ Assign Admin</button>
+            </div>
+        </form>
+    </div>
+</div>

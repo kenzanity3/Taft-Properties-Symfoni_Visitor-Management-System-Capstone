@@ -1,0 +1,451 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
+    ViewBag.Title = "SymfoniHome";
+    Layout = null;
+
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+}
+<link rel="stylesheet" href="~/css/Home.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<body>
+<!-- Header Bar -->
+<div class="header-bar">
+    <div class="header-logo">
+        <img src="~/lib/logo.png" alt="Logo" />
+        <span class="header-title">Symfoni Nichols<br />Condominium</span>
+    </div>
+    <div class="header-actions">
+        <a href="@Url.Action("KioskHome", "Kiosk")" class="kiosk-btn">
+            <i class="fas fa-home"></i> Kiosk Home
+        </a>
+        <a href="@Url.Action("Login", "Authentication")" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+    </div>
+</div>
+
+
+<div class="container overlay animate-fade-in">
+    <div class="welcome-section animate-bounce-in">
+        <h2>Welcome to Symfoni Nichols</h2>
+        <p>Your smart and stylish destination. Let's make your visit seamless.</p>
+    </div>
+
+    <!-- Improved Cards Section -->
+    <!-- Improved Cards Section with animations -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm animate-fade-in-up" style="animation-delay: 0.1s;">
+                <div class="card-body text-center p-4">
+                    <div class="icon-circle bg-primary mb-3">
+                        <i class="fas fa-calendar-check text-white"></i>
+                    </div>
+                    <h5 class="card-title">Set Appointment</h5>
+                    <p class="card-text">Schedule your visit and get approval from the unit owner or staff.</p>
+                    <a href="@Url.Action("AppointmentSet", "VisitorAppointment")" class="btn btn-primary">
+                        Book Now <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm animate-fade-in-up" style="animation-delay: 0.2s;">
+                <div class="card-body text-center p-4">
+                    <div class="icon-circle bg-success mb-3">
+                        <i class="fas fa-user-plus text-white"></i>
+                    </div>
+                    <h5 class="card-title">Visitor Registration</h5>
+                    <p class="card-text">Register now to use our facilities and access appointments.</p>
+                    <a href="@Url.Action("SignUp", "Authentication")" class="btn btn-success">
+                        Register <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Search Section with animation -->
+    <div class="card shadow-sm mb-4 animate-slide-in-right">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Check Appointment Status</h4>
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>
+                <input type="text"
+                       id="visitorContactSearchInput"
+                       class="form-control form-control-lg"
+                       placeholder="Enter your 11-digit contact number (09XXXXXXXXX)"
+                       maxlength="11"
+                       pattern="^09\d{9}$"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '')" />
+                <button class="btn btn-primary" id="searchContactBtn" type="button">
+                    <i class="fas fa-search me-2"></i> Search
+                </button>
+            </div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i> Enter the contact number you used when setting the appointment.
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading animation -->
+    <div id="searchLoading" class="text-center mt-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2">Searching appointments...</p>
+    </div>
+
+    <!-- Results Table with animation -->
+    <div class="card shadow-sm animate-fade-in" id="resultsCard" style="display: none;">
+        <div class="card-body">
+            <h4 class="card-title mb-4">Appointment Details</h4>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle" id="appointmentTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Contact Number</th>
+                            <th>Room Number</th>
+                            <th>Appointment Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="searchResult">
+                        <!-- Results will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<<script>
+     // Store the anti-forgery token globally for AJAX calls
+     const __RequestVerificationToken = '@token';
+
+     // Add these utility functions at the top of your script
+     function animateElement(element, animationClass, removeAfter = true) {
+         if (!element) return;
+
+         element.classList.add(animationClass);
+         if (removeAfter) {
+             setTimeout(() => {
+                 element.classList.remove(animationClass);
+             }, 1000);
+         }
+     }
+
+     function showElementWithAnimation(element, animationClass = 'animate-fade-in') {
+         if (!element) return;
+
+         element.style.display = element instanceof HTMLTableRowElement ? 'table-row' : 'block';
+         // Force reflow
+         void element.offsetWidth;
+         element.classList.add(animationClass);
+     }
+
+     function hideElementWithAnimation(element, animationClass = 'animate-fade-out') {
+         if (!element) return;
+
+         element.classList.add(animationClass);
+         setTimeout(() => {
+             element.style.display = 'none';
+             element.classList.remove(animationClass);
+         }, 500);
+     }
+
+     document.addEventListener('DOMContentLoaded', function() {
+         const searchInput = document.getElementById('visitorContactSearchInput');
+         const searchBtn = document.getElementById('searchContactBtn');
+         const resultsCard = document.getElementById('resultsCard');
+         const searchResult = document.getElementById('searchResult');
+         const searchLoading = document.getElementById('searchLoading');
+
+         if (!searchInput || !searchBtn || !resultsCard || !searchResult || !searchLoading) {
+             console.error('One or more required elements not found');
+             return;
+         }
+
+         // Search on button click
+         searchBtn.addEventListener('click', function() {
+             const contactNumber = searchInput.value.trim();
+             if (!validateContactNumber(contactNumber)) {
+                 showValidationError("Please enter a valid 11-digit contact number starting with 09");
+                 return;
+             }
+             checkAppointmentStatus(contactNumber);
+         });
+
+         // Also allow search on Enter key
+         searchInput.addEventListener('keypress', function(e) {
+             if (e.key === 'Enter') {
+                 searchBtn.click();
+             }
+         });
+
+         // Function to validate contact number
+         function validateContactNumber(contactNumber) {
+             return /^09\d{9}$/.test(contactNumber);
+         }
+
+         // Function to show validation error
+         function showValidationError(message) {
+             // Clear previous results
+             searchResult.innerHTML = '';
+             hideElementWithAnimation(resultsCard);
+
+             // Remove any existing error messages
+             const searchCard = document.querySelector('.card.shadow-sm.mb-4');
+             const existingError = searchCard.querySelector('.alert-danger');
+             if (existingError) {
+                 existingError.remove();
+             }
+
+             // Create and show error message
+             const errorElement = document.createElement('div');
+             errorElement.className = 'alert alert-danger mt-3 animate-fade-in';
+             errorElement.innerHTML = `<i class="fas fa-exclamation-circle me-2"></i> ${message}`;
+
+             // Insert after search bar
+             searchCard.appendChild(errorElement);
+
+             // Auto-remove after 5 seconds
+             setTimeout(() => {
+                 if (errorElement.parentNode) {
+                     hideElementWithAnimation(errorElement);
+                     setTimeout(() => errorElement.remove(), 500);
+                 }
+             }, 5000);
+         }
+
+         // Function to check appointment status
+     async function checkAppointmentStatus(contactNumber) {
+         try {
+             // Show loading indicator with animation
+             searchBtn.disabled = true;
+             searchBtn.classList.add('btn-loading');
+             showElementWithAnimation(searchLoading, 'animate-fade-in');
+
+             // Hide results with animation if they're visible
+             if (resultsCard.style.display === 'block') {
+                 hideElementWithAnimation(resultsCard);
+             }
+
+             // Clear any previous errors
+             const searchCard = document.querySelector('.card.shadow-sm.mb-4');
+             const existingError = searchCard.querySelector('.alert-danger');
+             if (existingError) {
+                 hideElementWithAnimation(existingError);
+                 setTimeout(() => existingError.remove(), 500);
+             }
+
+             const response = await fetch('/Home/CheckAppointmentStatus?contactNumber=' + encodeURIComponent(contactNumber));
+             if (!response.ok) {
+                 throw new Error('Network response was not ok');
+             }
+
+             const data = await response.json();
+
+             if (data.success) {
+                 displayAppointmentResults(data, contactNumber);
+                 setTimeout(() => {
+                     showElementWithAnimation(resultsCard, 'animate-fade-in-up');
+                 }, 300);
+             } else {
+                 showValidationError(data.message || 'No appointment found with this contact number');
+             }
+         } catch (error) {
+             console.error('Error:', error);
+             showValidationError('Failed to check appointment status. Please try again.');
+         } finally {
+             // Hide loading indicator
+             searchBtn.disabled = false;
+             searchBtn.classList.remove('btn-loading');
+             hideElementWithAnimation(searchLoading);
+         }
+     }
+
+         // Function to display appointment results
+            function displayAppointmentResults(data, contactNumber) {
+         searchResult.innerHTML = ''; // Clear previous results
+
+         // If no appointments
+         if (!data.hasAppointments) {
+             const noAppointmentRow = document.createElement('tr');
+             noAppointmentRow.innerHTML = `
+                 <td colspan="5" class="text-center py-4">
+                     <i class="fas fa-calendar-times fa-2x text-secondary mb-3"></i>
+                     <h5 class="text-muted">No appointments for this visitor</h5>
+                     <p class="text-muted small">Contact: ${data.contactNumber || contactNumber}</p>
+                 </td>
+             `;
+             searchResult.appendChild(noAppointmentRow);
+             animateElement(noAppointmentRow, 'animate-fade-in-up');
+             return;
+         }
+
+         // Process each appointment with staggered animations
+         data.appointments.forEach((appointment, index) => {
+             setTimeout(() => {
+                 const row = document.createElement('tr');
+                 row.classList.add('animate-fade-in-up');
+                 row.style.animationDelay = `${index * 0.1}s`;
+
+                 // Status badge
+                 let statusBadge;
+                 if (appointment.status === 'approved') {
+                     statusBadge = '<span class="badge bg-success">Approved</span>';
+                 } else if (appointment.status === 'denied') {
+                     statusBadge = '<span class="badge bg-danger">Denied</span>';
+                 } else {
+                     statusBadge = '<span class="badge bg-warning text-dark">Pending</span>';
+                 }
+
+                 // Format the appointment date
+                 let formattedDate = 'N/A';
+                 if (appointment.appointmentDate && appointment.appointmentDate !== 'N/A') {
+                     const dateObj = new Date(appointment.appointmentDate);
+                     if (!isNaN(dateObj.getTime())) {
+                         formattedDate = dateObj.toLocaleString('en-US', {
+                             month: 'short',
+                             day: 'numeric',
+                             year: 'numeric'
+                         });
+                     }
+                 }
+
+                 // Actions - only show cancel button for pending appointments
+                 let actions = '';
+                 if (appointment.status === 'pending') {
+                     actions = `<button class="btn btn-danger btn-sm" onclick="cancelAppointment('${contactNumber}', ${appointment.id || 0})">
+                         <i class="fas fa-times"></i> Cancel
+                     </button>`;
+                 } else {
+                     actions = '<span class="text-muted">No Actions</span>';
+                 }
+
+                 row.innerHTML = `
+                     <td>${data.contactNumber || contactNumber}</td>
+                     <td>${appointment.roomNumber || 'N/A'}</td>
+                     <td>${formattedDate}</td>
+                     <td>${statusBadge}</td>
+                     <td>${actions}</td>
+                 `;
+
+                 searchResult.appendChild(row);
+             }, index * 100);
+         });
+     }
+
+         // Add button click animation
+         searchBtn.addEventListener('click', function() {
+             animateElement(this, 'animate-pulse', false);
+             setTimeout(() => {
+                 this.classList.remove('animate-pulse');
+             }, 1000);
+         });
+
+         // Add input focus animation
+         searchInput.addEventListener('focus', function() {
+             this.classList.add('animate-pulse');
+         });
+
+         searchInput.addEventListener('blur', function() {
+             this.classList.remove('animate-pulse');
+         });
+     });
+
+     // ✅ REPLACE YOUR cancelAppointment FUNCTION WITH THIS
+     window.cancelAppointment = async function(contactNumber, appointmentId = 0) {
+         const { isConfirmed } = await Swal.fire({
+             title: 'Cancel Appointment',
+             text: 'Are you sure you want to cancel this appointment?',
+             icon: 'warning',
+             showCancelButton: true,
+             confirmButtonColor: '#d33',
+             cancelButtonColor: '#3085d6',
+             confirmButtonText: 'Yes, cancel it!'
+         });
+
+         if (isConfirmed) {
+             try {
+                 // ✅ USE THE GLOBAL TOKEN (no more document.querySelector)
+                 const response = await fetch('/Home/CancelAppointment', {
+                     method: 'POST',
+                     headers: {
+                         'Content-Type': 'application/json',
+                         'RequestVerificationToken': __RequestVerificationToken // ← Uses the injected token
+                     },
+                     body: JSON.stringify({
+                         contactNumber: contactNumber,
+                         appointmentId: appointmentId
+                     })
+                 });
+
+                 const data = await response.json();
+
+                 if (!response.ok) {
+                     throw new Error(data.message || 'Failed to cancel appointment');
+                 }
+
+                 if (data.success) {
+                     await Swal.fire(
+                         'Cancelled!',
+                         data.message || 'Your appointment has been cancelled.',
+                         'success'
+                     );
+                     // Refresh results by triggering search again
+                     const searchBtn = document.getElementById('searchContactBtn');
+                     if (searchBtn) searchBtn.click();
+                 } else {
+                     throw new Error(data.message || 'Failed to cancel appointment');
+                 }
+             } catch (error) {
+                 console.error('Error:', error);
+                 await Swal.fire(
+                     'Error',
+                     error.message || 'Failed to cancel appointment. Please try again.',
+                     'error'
+                 );
+             }
+         }
+     };
+</script>
+    <!-- Sweet Alert for Registration Success -->
+    @if (TempData["ShowRegisterAlert"]?.ToString() == "true")
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Registration Successful!',
+                    html: '@Html.Raw(TempData["RegisterMessage"])',
+                    confirmButtonText: 'Continue',
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    customClass: {
+                        popup: 'animate-scale-in',
+                        title: 'text-success',
+                        confirmButton: 'btn btn-success'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Clear the TempData to prevent showing the alert again on refresh
+                        fetch('/Home/ClearRegisterAlert', {
+                            method: 'POST',
+                            headers: {
+                                'RequestVerificationToken': '@token'
+                            }
+                        }).catch(err => console.error('Error clearing alert:', err));
+                    }
+                });
+            });
+        </script>
+    }
+
+
+
+</body>

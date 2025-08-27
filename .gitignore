@@ -1,0 +1,43 @@
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+[Bb]in/
+[Oo]bj/
+
+# VS Code settings
+.vscode/
+
+# Rider settings
+.idea/
+
+# Visual Studio temporary files
+*.tmp
+*.temp
+*.log
+*.vs/
+
+# NuGet packages
+*.nupkg
+packages/
+*.snupkg
+
+# ASP.NET / MVC / wwwroot uploads
+wwwroot/uploads/
+
+# Migrations
+VisitorManagementSystem-Capstone/Migrations/*.Designer.cs
+VisitorManagementSystem-Capstone/Migrations/*.cs
+
+# Rider / VS cache
+*.sln.cache
+*.sln.ide

@@ -1,0 +1,471 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.AppointmentViewModel
+@using System.Globalization
+@{
+    ViewBag.Title = "Set Appointment";
+    Layout = null;
+}
+<link rel="stylesheet" href="~/css/AppointmentSet.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- Header Bar -->
+<div class="header-bar">
+    <div class="header-logo">
+        <img src="~/lib/logo.png" alt="Logo" />
+        <span class="header-title">Symfoni Nichols<br />Condominium</span>
+    </div>
+    <div class="header-actions">
+        <a href="@Url.Action("KioskHome", "Kiosk")" class="kiosk-btn">
+            <i class="fas fa-home"></i> Kiosk Home
+        </a>
+        <a href="@Url.Action("Login", "Authentication")" class="login-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+    </div>
+</div>
+
+<!-- Back Button Container -->
+<div class="back-button-container">
+    <a href="@Url.Action("SymfoniHome", "Home")" class="btn-back">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="appointment-wrapper">
+    <div class="form-title">📌 Visitor Appointment Registration</div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success" role="alert">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger" role="alert">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <form id="appointmentForm" method="post" action="/VisitorAppointment/SubmitAppointment">
+        @Html.AntiForgeryToken()
+
+        <div class="appointment-container">
+            <!-- VISITOR COLUMN -->
+            <div class="visitor-column">
+                <div class="section-title">
+                    <i class="fas fa-user-circle"></i> Visitor Information
+                </div>
+
+                <div class="profile-section">
+                    <img id="profilePreview" src="/images/default.png" alt="Profile Picture" class="profile-preview" />
+                    <div id="visitorName" class="visitor-name">Visitor Profile</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="ContactNumber">Contact Number</label>
+                    <input type="tel" class="form-control" id="ContactNumber" name="ContactNumber"
+                           required pattern="[0-9]{11}" title="Please enter an 11-digit phone number"
+                           placeholder="09123456789" oninput="updateProfilePreview()"
+                           maxlength="11" minlength="11" value="@Model?.ContactNumber" />
+                    @Html.ValidationMessageFor(model => model.ContactNumber, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="PurposeOfVisit">
+                        <i class="fas fa-asterisk text-danger small"></i> Purpose of Visit
+                    </label>
+
+                    <select class="form-control mb-3" id="PurposeDropdown" onchange="updatePurposeFromDropdown()" required>
+                        <option value="">-- Select a purpose --</option>
+                        <option value="Personal Visit">Personal Visit</option>
+                        <option value="Delivery">Delivery</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Other">Other (specify below)</option>
+                    </select>
+
+                    <textarea class="form-control" id="PurposeOfVisit" name="PurposeOfVisit" rows="4"
+                              maxlength="1000" placeholder="Describe your visit purpose..."
+                              required oninput="updateWordCount(this.value.length)">@Model?.PurposeOfVisit</textarea>
+
+                    <div class="word-count" id="wordCount">@(Model?.PurposeOfVisit?.Length ?? 0) / 1000 characters</div>
+                    @Html.ValidationMessageFor(model => model.PurposeOfVisit, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <!-- APPOINTMENT COLUMN -->
+            <div class="appointment-column">
+                <div class="section-title">
+                    <i class="fas fa-calendar-alt"></i> Appointment Details
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="VisitCode">Visit Code (optional)</label>
+                    <input type="text" class="form-control" id="VisitCode" name="VisitCode"
+                           placeholder="e.g., ABC123"
+                           pattern="[A-Z0-9]{6}" title="6-character alphanumeric code"
+                           oninput="fetchRoomOwnerDetails()"
+                           onchange="fetchRoomOwnerDetails()"
+                           value="@Model?.VisitCode" />
+                    @Html.ValidationMessageFor(model => model.VisitCode, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="RoomOwnerFullName">Room Owner Name</label>
+                    <input type="text" class="form-control" id="RoomOwnerFullName" name="RoomOwnerFullName"
+                           required placeholder="Full name of unit owner"
+                           value="@Model?.RoomOwnerFullName" />
+                    @Html.ValidationMessageFor(model => model.RoomOwnerFullName, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="Tower">Tower</label>
+                    <select class="form-control" id="Tower" name="Tower" required>
+                        <option selected disabled value="">-- Select Tower --</option>
+                        <option value="Alto" selected="@(Model?.Tower == "Alto")">Alto</option>
+                        <option value="Bossa" selected="@(Model?.Tower == "Bossa")">Bossa</option>
+                    </select>
+                    @Html.ValidationMessageFor(model => model.Tower, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="RoomNumber">Unit Number</label>
+                    <input type="text" class="form-control" id="RoomNumber" name="RoomNumber"
+                           required placeholder="e.g., 101 or 205" maxlength="4"
+                           pattern="[0-9]+" title="Numbers only"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           value="@Model?.RoomNumber" />
+                    @Html.ValidationMessageFor(model => model.RoomNumber, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="AppointmentDate">Appointment Date</label>
+                   <input type="date" class="form-control" id="AppointmentDate" name="AppointmentDate"
+       required min="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"
+       value="@(Model?.AppointmentDate.GetValueOrDefault().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture))" />
+                           @Html.ValidationMessageFor(model => model.AppointmentDate, "", new { @class = "text-danger" })
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-container">
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-calendar-check me-2"></i> Confirm Appointment
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    // ==================== UTILITY FUNCTIONS ====================
+    function debounce(func, timeout = 500) {
+        let timer;
+        return (...args) => {
+            clearTimeout(timer);
+            timer = setTimeout(() => { func.apply(this, args); }, timeout);
+        };
+    }
+
+    function showErrorAlert(message) {
+        return Swal.fire({
+            title: 'Validation Error',
+            html: message,
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    }
+
+    // ==================== CORE FUNCTIONS ====================
+    function updateProfilePreview() {
+        const contactNumber = document.getElementById("ContactNumber").value.trim();
+        const profileImg = document.getElementById("profilePreview");
+        const visitorName = document.getElementById("visitorName");
+
+        // Show loading state only when we have a valid number
+        if (contactNumber.length === 11) {
+            profileImg.src = "/images/loading.gif";
+            visitorName.textContent = "Searching...";
+            visitorName.style.color = "#6c757d";
+            
+            // Fetch visitor profile
+            fetch(`/VisitorAppointment/GetVisitorProfile?contactNumber=${encodeURIComponent(contactNumber)}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(profileData => {
+                    if (profileData && profileData.success) {
+                        profileImg.src = profileData.profilePicture || "/images/default.png";
+                        visitorName.textContent = profileData.fullName || "Visitor Found";
+                        visitorName.style.color = "#28a745";
+                    } else if (profileData) {
+                        profileImg.src = "/images/default.png";
+                        visitorName.textContent = "Visitor not found";
+                        visitorName.style.color = "#dc3545";
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    profileImg.src = "/images/default.png";
+                    visitorName.textContent = "Error loading profile";
+                    visitorName.style.color = "#dc3545";
+                });
+        } else if (contactNumber.length > 0 && contactNumber.length < 11) {
+            profileImg.src = "/images/default.png";
+            visitorName.textContent = "Enter 11-digit number";
+            visitorName.style.color = "#ffc107";
+        } else {
+            profileImg.src = "/images/default.png";
+            visitorName.textContent = "Visitor Profile";
+            visitorName.style.color = "#2c3e50";
+        }
+    }
+
+    async function fetchRoomOwnerDetails() {
+        const visitCode = document.getElementById("VisitCode").value.trim();
+        const roomNumberInput = document.getElementById("RoomNumber");
+        const roomOwnerInput = document.getElementById("RoomOwnerFullName");
+        const towerInput = document.getElementById("Tower");
+
+        if (!visitCode || visitCode.length !== 6) {
+            resetRoomOwnerFields();
+            return;
+        }
+
+        try {
+            const response = await fetch(`/VisitorAppointment/GetRoomOwnerByVisitCode?visitCode=${encodeURIComponent(visitCode)}`);
+            if (!response.ok) throw new Error('Network response was not ok');
+
+            const data = await response.json();
+            if (data.success) {
+                roomNumberInput.value = data.roomNumber || "";
+                roomOwnerInput.value = data.fullName || "";
+                towerInput.value = data.tower || "";
+
+                // Make inputs readonly when visit code is provided
+                roomNumberInput.readOnly = true;
+                roomOwnerInput.readOnly = true;
+                towerInput.setAttribute("data-readonly", "true");
+            } else {
+                showErrorAlert(data.message || 'Invalid visit code');
+                resetRoomOwnerFields();
+            }
+        } catch (error) {
+            console.error("Error fetching room owner details:", error);
+            showErrorAlert('Failed to fetch room owner details');
+            resetRoomOwnerFields();
+        }
+
+        function resetRoomOwnerFields() {
+            roomNumberInput.value = "";
+            roomOwnerInput.value = "";
+            towerInput.value = "";
+            roomNumberInput.readOnly = false;
+            roomOwnerInput.readOnly = false;
+            towerInput.removeAttribute("data-readonly");
+        }
+    }
+
+    // ==================== VALIDATION FUNCTIONS ====================
+    function validateContactNumber(element) {
+        const value = element.value.trim();
+        if (!value) return "is required";
+        if (value.length !== 11) return "must be 11 digits";
+        return null;
+    }
+
+    function validateRequired(element) {
+        return !element.value.trim() ? "is required" : null;
+    }
+
+    function validatePurpose(element) {
+        const value = element.value.trim();
+        if (!value) return "is required";
+        if (value.length > 1000) return "cannot exceed 1000 characters";
+        return null;
+    }
+
+   // Update the validateAppointmentDate function to ensure only future dates
+    function validateAppointmentDate(element) {
+        if (!element.value) return "is required";
+
+        const selectedDate = new Date(element.value);
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        tomorrow.setHours(0, 0, 0, 0);
+
+        if (selectedDate < tomorrow) return "must be a future date (tomorrow or later)";
+        return null;
+    }
+
+    // ==================== PURPOSE OF VISIT FUNCTIONS ====================
+    function updatePurposeFromDropdown() {
+        const dropdown = document.getElementById("PurposeDropdown");
+        const textarea = document.getElementById("PurposeOfVisit");
+
+        if (dropdown.value === "Other") {
+            textarea.value = "";
+            textarea.focus();
+            textarea.dataset.userEdited = "true";
+        } else if (dropdown.value) {
+            textarea.value = dropdown.value;
+            textarea.dataset.userEdited = "";
+        }
+        updateWordCount(textarea.value.length);
+
+        // Validate immediately after change
+        const error = validatePurpose(textarea);
+        if (error) {
+            textarea.classList.add('is-invalid');
+        } else {
+            textarea.classList.remove('is-invalid');
+        }
+    }
+
+    function updateWordCount(count) {
+        const wordCountElement = document.getElementById("wordCount");
+        wordCountElement.textContent = `${count} / 1000 characters`;
+
+        // Add warning class if approaching limit
+        if (count > 900) {
+            wordCountElement.classList.add('text-warning');
+            wordCountElement.classList.remove('text-danger');
+        } else if (count > 1000) {
+            wordCountElement.classList.add('text-danger');
+            wordCountElement.classList.remove('text-warning');
+        } else {
+            wordCountElement.classList.remove('text-warning', 'text-danger');
+        }
+    }
+
+    async function validateFormWithSweetAlert() {
+        const requiredFields = [
+            { id: "ContactNumber", name: "Contact Number", validate: validateContactNumber },
+            { id: "PurposeOfVisit", name: "Purpose of Visit", validate: validatePurpose },
+            { id: "RoomOwnerFullName", name: "Room Owner Name", validate: validateRequired },
+            { id: "Tower", name: "Tower", validate: validateRequired },
+            { id: "RoomNumber", name: "Room Number", validate: validateRequired },
+            { id: "AppointmentDate", name: "Appointment Date", validate: validateAppointmentDate }
+        ];
+
+        let errorMessages = [];
+        let firstInvalidField = null;
+
+        requiredFields.forEach(field => {
+            const element = document.getElementById(field.id);
+            const error = field.validate(element);
+
+            if (error) {
+                if (!firstInvalidField) firstInvalidField = element;
+                element.classList.add('is-invalid');
+                errorMessages.push(`• ${field.name}: ${error}`);
+            } else {
+                element.classList.remove('is-invalid');
+            }
+        });
+
+        if (errorMessages.length > 0) {
+            await showErrorAlert(`Please fix the following issues:<br><br>${errorMessages.join('<br>')}`);
+            firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        return true;
+    }
+
+    // ==================== FORM SUBMISSION HANDLER ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set minimum date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById("AppointmentDate").min = tomorrow.toISOString().split('T')[0];
+        
+        // Initialize contact number field if it has value
+        const contactField = document.getElementById("ContactNumber");
+        if (contactField && contactField.value.trim().length === 11) {
+            updateProfilePreview();
+        }
+
+        // Set up event listeners
+        contactField.addEventListener('input', debounce(updateProfilePreview));
+        document.getElementById("VisitCode").addEventListener('input', debounce(fetchRoomOwnerDetails));
+        document.getElementById("PurposeDropdown").addEventListener('change', updatePurposeFromDropdown);
+
+        // Enhanced purpose textarea handling
+        const purposeTextarea = document.getElementById("PurposeOfVisit");
+        purposeTextarea.addEventListener('input', function() {
+            updateWordCount(this.value.length);
+
+            // If user types something different from dropdown, clear dropdown selection
+            const dropdown = document.getElementById("PurposeDropdown");
+            if (dropdown.value && this.value !== dropdown.value) {
+                dropdown.value = "";
+            }
+
+            this.dataset.userEdited = this.value.trim() ? "true" : "";
+
+            // Validate on input
+            const error = validatePurpose(this);
+            if (error) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        // Validate purpose on blur
+        purposeTextarea.addEventListener('blur', function() {
+            const error = validatePurpose(this);
+            if (error) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+            }
+        });
+
+        document.getElementById("Tower").addEventListener('mousedown', function(e) {
+            if (this.hasAttribute("data-readonly")) {
+                e.preventDefault();
+            }
+        });
+
+        // Form submission handler with error checking
+        const form = document.getElementById("appointmentForm");
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                validateFormWithSweetAlert().then(isValid => {
+                    if (!isValid) return;
+
+                    // Final validation to ensure purpose is not empty
+                    const purposeField = document.getElementById("PurposeOfVisit");
+                    if (!purposeField.value.trim()) {
+                        purposeField.classList.add('is-invalid');
+                        showErrorAlert("Purpose of visit is required");
+                        purposeField.focus();
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: 'Confirm Appointment',
+                        html: `Are you sure you want to submit this appointment?<br><br>
+                               <strong>Purpose:</strong> ${purposeField.value.substring(0, 100)}${purposeField.value.length > 100 ? '...' : ''}`,
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Yes, submit!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        }
+    });
+</script>

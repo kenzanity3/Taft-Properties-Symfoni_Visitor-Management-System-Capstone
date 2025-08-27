@@ -1,0 +1,144 @@
+﻿@model VisitorManagementSystem_Capstone.ViewModels.POSTViewModel
+@{
+    ViewData["Title"] = "User Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .section {
+        background: #fff;
+        padding: 30px;
+        margin-bottom: 40px;
+        border-radius: 16px;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-title {
+        color: #1A2C4E;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    .form-label {
+        font-weight: 600;
+    }
+
+    thead th {
+        background-color: #1A2C4E;
+        color: #fff;
+        text-align: center;
+    }
+
+    .table td, .table th {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .btn-action {
+        padding: 5px 10px;
+        border-radius: 6px;
+    }
+</style>
+
+<div class="container mt-4">
+    <!-- ADD ADMIN OR STAFF FORM -->
+    <div class="section">
+        <h3 class="section-title">➕ Add Admin / Staff</h3>
+
+        <form method="post" action="/Account/AddUserWithRole">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" name="FullName" class="form-control" placeholder="e.g. Ana Cruz" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="Email" class="form-control" placeholder="e.g. ana@example.com" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Contact</label>
+                    <input type="text" name="Contact" class="form-control" placeholder="e.g. 09123456789" required />
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">Username</label>
+                    <input type="text" name="Username" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Password</label>
+                    <input type="password" name="Password" class="form-control" required />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Role</label>
+                    <select class="form-select" name="Role" required>
+                        <option value="">-- Select Role --</option>
+                        <option value="Admin">Admin</option>
+                        <option value="Staff">Staff</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary px-4">
+                    <i class="fas fa-user-plus me-1"></i> Add User
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- ADMIN & STAFF TABLE LIST -->
+    <div class="section">
+        <h3 class="section-title">👥 User Accounts (Admins & Staff)</h3>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Contact</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Date Registered</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>USR-001</td>
+                        <td>Ana Cruz</td>
+                        <td>ana@example.com</td>
+                        <td>09123456789</td>
+                        <td>anaC</td>
+                        <td><span class="badge bg-danger">Admin</span></td>
+                        <td>July 14, 2025</td>
+                        <td>
+                            <a href="/Account/ViewUser/1" class="btn btn-sm btn-primary btn-action">👁️</a>
+                            <a href="/Account/EditUser/1" class="btn btn-sm btn-warning text-white btn-action">✏️</a>
+                            <a href="/Account/DeleteUser/1" class="btn btn-sm btn-danger btn-action">🗑️</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>USR-002</td>
+                        <td>Mark Reyes</td>
+                        <td>mark@example.com</td>
+                        <td>09999999999</td>
+                        <td>markR</td>
+                        <td><span class="badge bg-primary">Staff</span></td>
+                        <td>July 13, 2025</td>
+                        <td>
+                            <a href="/Account/ViewUser/2" class="btn btn-sm btn-primary btn-action">👁️</a>
+                            <a href="/Account/EditUser/2" class="btn btn-sm btn-warning text-white btn-action">✏️</a>
+                            <a href="/Account/DeleteUser/2" class="btn btn-sm btn-danger btn-action">🗑️</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+    <script src="~/js/jquery.validate.min.js"></script>
+    <script src="~/js/jquery.validate.unobtrusive.min.js"></script>

@@ -1,0 +1,94 @@
+﻿@{
+    ViewBag.Title = "End Facility Session";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .session-wrapper {
+        background: #ffffff;
+        padding: 40px 30px;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    }
+
+    h3 {
+        color: #1A2C4E;
+        font-weight: 700;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    thead th {
+        background-color: #1A2C4E !important;
+        color: white !important;
+        font-weight: 600;
+    }
+
+    .btn-end {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+
+    .table-striped > tbody > tr:nth-of-type(odd) {
+        background-color: #f6f9fc;
+    }
+</style>
+
+<div class="container mt-4">
+    <div class="session-wrapper">
+        <h3 class="mb-4">⏱️ End Facility Session</h3>
+
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Facility</th>
+                        <th>Used By</th>
+                        <th>Start Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Static Sample Rows: Replace with Model if needed -->
+                    <tr>
+                        <td>Swimming Pool</td>
+                        <td>Juan Dela Cruz</td>
+                        <td>2025-07-12 08:00 AM</td>
+                        <td><span class="badge bg-success">Ongoing</span></td>
+                        <td>
+                            <a href="/Home/EndSession/1" class="btn btn-sm btn-danger btn-end">
+                                <i class="fas fa-clock"></i> End Session
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Function Room</td>
+                        <td>Maria Santos</td>
+                        <td>2025-07-12 09:00 AM</td>
+                        <td><span class="badge bg-success">Ongoing</span></td>
+                        <td>
+                            <a href="/Home/EndSession/2" class="btn btn-sm btn-danger btn-end">
+                                <i class="fas fa-clock"></i> End Session
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Gym</td>
+                        <td>Andrei Lopez</td>
+                        <td>2025-07-12 10:00 AM</td>
+                        <td><span class="badge bg-success">Ongoing</span></td>
+                        <td>
+                            <a href="/Home/EndSession/3" class="btn btn-sm btn-danger btn-end">
+                                <i class="fas fa-clock"></i> End Session
+                            </a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
