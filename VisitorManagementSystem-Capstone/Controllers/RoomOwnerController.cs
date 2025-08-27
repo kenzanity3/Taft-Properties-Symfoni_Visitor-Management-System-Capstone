@@ -40,6 +40,27 @@ namespace VisitorManagementSystem_Capstone.Controllers
             return View(model);
         }
 
+        public async Task<IActionResult> VisitHistory()
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var visitLogs = await _context.VisitLogs
+                .Include(v => v.Visitor)
+                    .ThenInclude(v => v.User)
+                .Include(v => v.Room)
+                .Where(v => v.OwnerUserId == userId &&
+                           v.VerificationStatus != null && // Only approved or declined
+                           v.logStatus == true)
+                .OrderByDescending(v => v.AppointmentDate)
+                .ToListAsync();
+
+            return View(visitLogs);
+        }
+
         // In RoomOwnerController.cs - getVisitList method
         private async Task<List<VisitLog>> getVisitList()
         {
@@ -363,28 +384,43 @@ namespace VisitorManagementSystem_Capstone.Controllers
             }
         }
 
+        // Update GetQuickStats to get real-time data
         public async Task<JsonResult> GetQuickStats()
         {
             var userId = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userId))
             {
-                return Json(new { pendingCount = 0, approvedToday = 0 });
+                return Json(new { pendingCount = 0, approvedToday = 0, staffApprovalCount = 0 });
             }
 
+            var today = DateTime.Today;
+
             var pendingCount = await _context.VisitLogs
-                .CountAsync(v => v.OwnerUserId == userId && v.VerificationStatus == null && v.logStatus == true);
+                .CountAsync(v => v.OwnerUserId == userId &&
+                                v.VerificationStatus == null &&
+                                v.logStatus == true);
 
             var approvedToday = await _context.VisitLogs
                 .CountAsync(v => v.OwnerUserId == userId
                     && v.VerificationStatus == true
                     && v.VerifiedDateTime.HasValue
-                    && v.VerifiedDateTime.Value.Date == DateTime.Today
+                    && v.VerifiedDateTime.Value.Date == today
                     && v.logStatus == true);
+
+            var staffApprovalCount = await _context.VisitLogs
+                .CountAsync(v => v.OwnerUserId == userId
+                    && v.VerificationStatus == null
+                    && v.logStatus == true
+                    && v.CreatedBy == "staff"
+                    && (v.Visitor.User.ContactNumber == null ||
+                        v.Visitor.User.ContactNumber == "N/A" ||
+                        string.IsNullOrEmpty(v.Visitor.User.ContactNumber)));
 
             return Json(new
             {
                 pendingCount = pendingCount,
-                approvedToday = approvedToday
+                approvedToday = approvedToday,
+                staffApprovalCount = staffApprovalCount
             });
         }
 
@@ -569,6 +605,120 @@ namespace VisitorManagementSystem_Capstone.Controllers
                     purpose = appointment.PurposeOfVisit,
                     visitsToday = todayVisits
                 });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Add method to remove approved appointment
+        [HttpPost]
+        public async Task<IActionResult> RemoveApprovedAppointment(int VisitLogId)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserId");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not authenticated" });
+                }
+
+                var visitLog = await _context.VisitLogs
+                    .Include(v => v.CheckInOut)
+                    .FirstOrDefaultAsync(v => v.VisitLogId == VisitLogId);
+
+                if (visitLog == null)
+                {
+                    return Json(new { success = false, message = "Visit log not found." });
+                }
+
+                // Check if current user is the owner
+                if (visitLog.OwnerUserId != userId)
+                {
+                    return Json(new { success = false, message = "Unauthorized to remove this appointment" });
+                }
+
+                // Check if visitor has already checked in
+                if (visitLog.CheckInOut != null && visitLog.CheckInOut.CheckInDateTime != null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Cannot remove appointment - visitor has already checked in"
+                    });
+                }
+
+                // Soft delete by setting logStatus to false
+                visitLog.logStatus = false;
+
+                _context.VisitLogs.Update(visitLog);
+                await _context.SaveChangesAsync();
+
+                // Log the action
+                var actionLog = new AccountActionLog
+                {
+                    ActionDateTime = DateTime.UtcNow,
+                    ActionText = $"Removed approved appointment: Visit Log ID {visitLog.VisitLogId}",
+                    ActionType = "Deleted",
+                    UserId = userId,
+                    TargetUserId = visitLog.VisitorUserId
+                };
+
+                _context.accountActionLogs.Add(actionLog);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Appointment removed successfully" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Add this method to RoomOwnerController.cs
+        [HttpPost]
+        public async Task<IActionResult> CancelApprovedAppointment(int visitLogId)
+        {
+            try
+            {
+                var userId = HttpContext.Session.GetString("UserId");
+                if (string.IsNullOrEmpty(userId))
+                {
+                    return Json(new { success = false, message = "User not authenticated" });
+                }
+
+                var visitLog = await _context.VisitLogs
+                    .Include(v => v.CheckInOut)
+                    .FirstOrDefaultAsync(v => v.VisitLogId == visitLogId);
+
+                if (visitLog == null)
+                {
+                    return Json(new { success = false, message = "Appointment not found" });
+                }
+
+                // Check if visitor has already checked in
+                if (visitLog.CheckInOut != null && visitLog.CheckInOut.CheckInDateTime != null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        message = "Cannot cancel appointment - visitor has already checked in"
+                    });
+                }
+
+                // Check if current user is the owner
+                if (visitLog.OwnerUserId != userId)
+                {
+                    return Json(new { success = false, message = "Unauthorized to cancel this appointment" });
+                }
+
+                // Soft delete by setting logStatus to false
+                visitLog.logStatus = false;
+                _context.VisitLogs.Update(visitLog);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Appointment cancelled successfully" });
             }
             catch (Exception ex)
             {

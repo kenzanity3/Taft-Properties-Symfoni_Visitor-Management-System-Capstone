@@ -4,7 +4,6 @@
     font-weight: 700;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
-
 .stat-card {
     border-radius: 15px;
     padding: 20px;
@@ -20,13 +19,11 @@
         transform: translateY(-5px);
         box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
-
 .stat-icon {
     font-size: 2.5rem;
     margin-right: 20px;
     opacity: 0.8;
 }
-
 .stat-content h3 {
     font-size: 2rem;
     font-weight: bold;
@@ -312,13 +309,11 @@
 </style >
 
 @keyframes spin {
-    0%
+    0% {
+        transform: rotate(0deg);
+    }
 
-{
-    transform: rotate(0deg);
-}
-
-100% {
-    transform: rotate(360deg);
-}
+    100% {
+        transform: rotate(360deg);
+    }
 }

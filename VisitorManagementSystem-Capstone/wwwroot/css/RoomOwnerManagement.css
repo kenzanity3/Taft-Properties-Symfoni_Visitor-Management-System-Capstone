@@ -73,7 +73,6 @@ h2 {
 .modal-lg {
     max-width: 700px;
 }
-
 .modal-header {
     background-color: #1A2C4E;
     color: white;
@@ -111,7 +110,6 @@ h2 {
         margin-left: -0.5rem;
         margin-top: -0.5rem;
     }
-
 .form-switch .form-check-input {
     width: 3em;
     height: 1.5em;
@@ -124,7 +122,6 @@ h2 {
     font-weight: 500;
     cursor: pointer;
 }
-
 input[type="file"].form-control {
     padding: 6px;
 }
@@ -142,15 +139,13 @@ input[type="file"].form-control {
     text-align: center;
     box-shadow: 0 4px 16px rgba(26,44,78,0.08);
 }
-
-    .info-id-card .profile-img-preview {
-        margin-bottom: 12px;
-    }
-
-    .info-id-card .badge {
-        font-size: 1.1rem;
-        margin-top: 8px;
-    }
+.info-id-card .profile-img-preview {
+    margin-bottom: 12px;
+}
+.info-id-card .badge {
+    font-size: 1.1rem;
+    margin-top: 8px;
+}
 
 @media (max-width: 768px) {
     .roomowner-wrapper {

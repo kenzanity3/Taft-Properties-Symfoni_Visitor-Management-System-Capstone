@@ -539,7 +539,7 @@ namespace VisitorManagementSystem_Capstone.Controllers
                 var visitLog = await _context.VisitLogs
                     .Include(v => v.CheckInOut)
                     .FirstOrDefaultAsync(v => v.VisitorUserId == user.UserId &&
-                                            v.logStatus == true &&
+                                            v.logStatus &&
                                             v.VerificationStatus == true &&
                                             (v.AppointmentDate != null || v.AppointmentDate == DateOnly.FromDateTime(DateTime.Today)) ||
                                             (v.IssueDate == DateOnly.FromDateTime(DateTime.Today) || v.CheckInOut!.CheckInDateTime.Date == DateTime.Today) &&

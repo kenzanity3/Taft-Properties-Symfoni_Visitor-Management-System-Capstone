@@ -2,6 +2,22 @@ body {
     background-color: #f8f9fa;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+/*status colors*/
+.text-secondary {
+    color: #6c757d !important;
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+.text-warning {
+    color: #ffc107 !important;
+}
 
 .dashboard-header {
     color: #2c3e50;
@@ -26,11 +42,11 @@ body {
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
         padding: 1rem 1.5rem;
     }
-
     .card-modern:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
     }
+
 
 .card-body {
     padding: 1.5rem;
@@ -76,7 +92,6 @@ body {
     padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
 }
-
 #copyCodeBtn {
     transition: all 0.3s ease;
 }
@@ -158,7 +173,6 @@ body {
     background: linear-gradient(45deg, #fff3cd, #ffeaa7);
     border: 1px solid #ffeaa7;
 }
-
 .list-group-item {
     border-left: none;
     border-right: none;

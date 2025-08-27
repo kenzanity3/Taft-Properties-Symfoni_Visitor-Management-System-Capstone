@@ -59,7 +59,7 @@ body, html {
     border: 2px dashed #ccc;
     padding: 8px;
     background: white;
-    transition: transform 0.3s ease
+    transition: transform 0.3s ease 
 }
 
     .qr-box img:hover {

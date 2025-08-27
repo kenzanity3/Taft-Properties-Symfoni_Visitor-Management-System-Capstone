@@ -2,265 +2,561 @@
     ViewBag.Title = "Visitor Reports";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 <style>
-    body {
-        background: #f4f7fa;
-        font-family: 'Segoe UI', sans-serif;
-    }
+    /* Keep your existing styles, add these new ones */
 
-    h2 {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    /* Summary Cards */
-    .summary-card {
-        border-radius: 20px;
-        padding: 25px;
-        color: #fff;
-        text-align: center;
-        transition: transform 0.2s ease-in-out;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    }
-
-        .summary-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .summary-card h4 {
-            margin: 0;
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        .summary-card p {
-            margin: 5px 0 0;
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-    /* Only 2 main colors: Blue + Green */
-    .bg-theme-blue {
-        background: linear-gradient(135deg, #1A2C4E, #1A2C4E);
-    }
-
-    .bg-theme-green {
-        background: linear-gradient(135deg, #1A2C4E, #1A2C4E);
-    }
-
-    /* Report Sections */
-    .report-section {
-        margin-top: 30px;
+    .filter-section {
         background: #fff;
-        padding: 25px;
-        border-radius: 20px;
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     }
 
-    .table thead {
-        background: #f1f3f5;
-    }
-
-    .table th {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .table tbody tr:hover {
-        background-color: #f8f9fa;
-        transition: background-color 0.2s ease;
-    }
-
-    /* Chart container */
-    #visitorChart {
-        background-color: #fff;
-        border-radius: 12px;
-        padding: 10px;
-    }
-
-    /* Buttons - only 2 theme colors */
-    .btn-approve {
-        background-color: #2ecc71;
-        border: none;
-        color: #fff;
-    }
-
-        .btn-approve:hover {
-            background-color: #27ae60;
-        }
-
-    .btn-decline {
-        background-color: #e74c3c;
-        border: none;
-        color: #fff;
-    }
-
-        .btn-decline:hover {
-            background-color: #c0392b;
-        }
-
-    .btn-details {
-        background-color: #2196f3;
-        border: none;
-        color: #fff;
-    }
-
-        .btn-details:hover {
-            background-color: #1976d2;
-        }
-    .report-wrapper {
-        padding: 40px 25px;
-        background: #f8f9fa;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .report-header h2 {
-        color: #1A2C4E;
-        font-weight: bold;
-    }
-
-    .summary-cards {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
+    .chart-container {
+        position: relative;
+        height: 400px;
         margin-bottom: 30px;
     }
 
-    .summary-card {
-        flex: 1;
-        min-width: 200px;
-        background: #1A2C4E;
+    .peak-hours-card {
+        background: linear-gradient(135deg, #1A2C4E, #2c3e50);
+        color: white;
         border-radius: 12px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
         padding: 20px;
         text-align: center;
     }
 
-        .summary-card h5,
-        .summary-card span {
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .summary-card span {
-            font-size: 1.5rem;
-        }
-
-    thead th {
-        background-color: #1A2C4E;
-        color: #ffffff;
-        text-align: center;
+    .visitor-type-badge {
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-weight: 600;
     }
 
-    .table td,
-    .table th {
-        vertical-align: middle;
-        text-align: center;
-    }
-
-    .btn-custom {
-        border-radius: 8px;
-    }
-
-    .badge {
-        font-size: 0.9rem;
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        border-radius: 12px;
     }
 </style>
 
-<div class="container mt-4">
-    <div class="report-wrapper">
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="dashboard-header">
+            <i class="fa-solid fa-chart-line me-2"></i> Visitor Reports & Analytics
+        </h2>
+        <div class="btn-group">
+            <button class="btn btn-outline-primary" onclick="exportReport('excel')">
+                <i class="fa-solid fa-file-excel me-2"></i> Export Excel
+            </button>
+            <button class="btn btn-outline-danger" onclick="exportReport('pdf')">
+                <i class="fa-solid fa-file-pdf me-2"></i> Export PDF
+            </button>
+        </div>
+    </div>
 
-        <!-- Header -->
-        <div class="d-flex justify-content-between align-items-center report-header mb-4">
-            <h2>📊 Visitor Visits Report</h2>
-            <div class="d-flex gap-2">
-                <button onclick="location.reload()" class="btn btn-dark btn-custom">🔁 Refresh</button>
-                <button class="btn btn-success btn-custom">⬇️ Export</button>
+    <!-- Filters Card -->
+    <div class="card card-modern mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-filter me-2"></i> Report Filters
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <input type="text" class="form-control" id="dateRange" placeholder="Select date range">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label class="form-label">Report Type</label>
+                        <select class="form-select" id="reportType">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        <label class="form-label">Trends Period</label>
+                        <select class="form-select" id="trendsPeriod">
+                            <option value="monthly">Last 6 Months</option>
+                            <option value="weekly">Last 30 Days</option>
+                            <option value="yearly">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3 d-flex align-items-end" style="height: 38px;">
+                        <button class="btn btn-primary w-100" onclick="loadReports()">
+                            <i class="fa-solid fa-refresh me-2"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
-        <!-- Summary Cards -->
-        <div class="row g-4 mb-4">
-            <div class="col-md-3">
-                <div class="summary-card bg-theme-blue">
-                    <i class="fa-solid fa-bed"></i>
-                    <h4>120</h4>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stat-card bg-primary">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="totalVisitorsToday">0</h3>
                     <p>Visitors Today</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="summary-card bg-theme-green">
-                    <i class="fa-solid fa-users"></i>
-                    <h4>530</h4>
-                    <p>This Week</p>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-success">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-door-open"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="checkedInVisitors">0</h3>
+                    <p>Currently Checked In</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="summary-card bg-theme-blue">
-                    <i class="fa-solid fa-calendar-check"></i>
-                    <h4>2,400</h4>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-warning">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="pendingApprovals">0</h3>
+                    <p>Pending Approvals</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stat-card bg-info">
+                <div class="stat-icon">
+                    <i class="fa-solid fa-calendar-month"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="monthlyVisitors">0</h3>
                     <p>This Month</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="summary-card bg-theme-green">
-                    <i class="fa-solid fa-coins"></i>
-                    <h4>18,700</h4>
-                    <p>This Year</p>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-chart-line me-2"></i> Visitor Trends
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="visitorTrendsChart" height="250"></canvas>
                 </div>
             </div>
         </div>
-        <!-- Visitor Chart -->
-        <div class="report-section">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="mb-0"><i class="fa-solid fa-users me-2 text-primary"></i> Monthly Visitor Report</h5>
-                <select class="form-select w-auto">
-                    <option>Monthly</option>
-                    <option>Weekly</option>
-                    <option>Daily</option>
-                    <option>Yearly</option>
-                </select>
+        <div class="col-md-4">
+            <div class="card card-modern">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-chart-pie me-2"></i> Status Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="statusDistributionChart" height="250"></canvas>
+                </div>
             </div>
-            <canvas id="visitorChart" height="90"></canvas>
         </div>
+    </div>
 
-
-        <!-- Table -->
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped shadow-sm bg-white rounded">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Facility</th>
-                        <th>User</th>
-                        <th>Time In</th>
-                        <th>Time Out</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>2025-07-12</td>
-                        <td>Swimming Pool</td>
-                        <td>Juan Dela Cruz</td>
-                        <td>08:00 AM</td>
-                        <td>10:00 AM</td>
-                        <td><span class="badge bg-success">Completed</span></td>
-                    </tr>
-                    <tr>
-                        <td>2025-07-12</td>
-                        <td>Gym Room</td>
-                        <td>Maria Santos</td>
-                        <td>09:30 AM</td>
-                        <td>--</td>
-                        <td><span class="badge bg-warning text-dark">Ongoing</span></td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Reports Table -->
+    <div class="card card-modern">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-table me-2"></i> Visitor Reports
+            </h5>
+            <span class="badge bg-primary" id="totalRecords">0 records</span>
         </div>
-
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="reportsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Visitor Name</th>
+                            <th>Contact</th>
+                            <th>Room</th>
+                            <th>Room Owner</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Check-in Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                                <p class="mt-2">Select a date range to generate reports</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Initialize date range picker
+        flatpickr("#dateRange", {
+            mode: "range",
+            dateFormat: "Y-m-d",
+            defaultDate: [new Date().toISOString().split('T')[0]],
+            maxDate: "today"
+        });
+
+        // Initialize charts
+        let trendsChart = null;
+        let distributionChart = null;
+
+        $(document).ready(function () {
+            loadDashboardStats();
+            loadVisitorTrends();
+        });
+
+        function loadDashboardStats() {
+            $.get('/Reports/GetDashboardStats')
+                .done(function (response) {
+                    if (response.success) {
+                        $('#totalVisitorsToday').text(response.totalVisitorsToday);
+                        $('#checkedInVisitors').text(response.checkedInVisitors);
+                        $('#pendingApprovals').text(response.pendingApprovals);
+                        $('#monthlyVisitors').text(response.totalVisitorsThisMonth);
+                    }
+                })
+                .fail(function () {
+                    console.error('Failed to load dashboard statistics');
+                });
+        }
+
+        function loadVisitorTrends() {
+            const period = $('#trendsPeriod').val();
+
+            $.get('/Reports/GetVisitorTrends', { period: period })
+                .done(function (response) {
+                    if (response.success) {
+                        updateTrendsChart(response.data);
+                        updateDistributionChart(response.data);
+                    }
+                })
+                .fail(function () {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to load visitor trends data.'
+                    });
+                });
+        }
+
+        function loadReports() {
+            const dateRange = $('#dateRange').val();
+            const reportType = $('#reportType').val();
+
+            if (!dateRange) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Date Range Required',
+                    text: 'Please select a date range to generate reports.'
+                });
+                return;
+            }
+
+            const dates = dateRange.split(' to ');
+            const startDate = dates[0];
+            const endDate = dates[1] || dates[0];
+
+            Swal.fire({
+                title: 'Generating Report',
+                text: 'Please wait while we generate your report...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.get('/Reports/GetVisitorReports', {
+                startDate: startDate,
+                endDate: endDate,
+                reportType: reportType
+            })
+            .done(function (response) {
+                Swal.close();
+
+                if (response.success) {
+                    updateReportsTable(response.data);
+                    $('#totalRecords').text(response.totalRecords + ' records');
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: response.message
+                    });
+                }
+            })
+            .fail(function () {
+                Swal.close();
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to generate report. Please try again.'
+                });
+            });
+        }
+
+        function updateReportsTable(data) {
+            const tbody = $('#reportsTable tbody');
+            tbody.empty();
+
+            if (data.length === 0) {
+                tbody.append(`
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem;"></i>
+                            <p class="mt-2">No records found for the selected date range</p>
+                        </td>
+                    </tr>
+                `);
+                return;
+            }
+
+            data.forEach(item => {
+                const row = `
+                    <tr>
+                        <td>${item.Date}</td>
+                        <td>${item.VisitorName}</td>
+                        <td>${item.ContactNumber || 'N/A'}</td>
+                        <td>${item.RoomNumber}</td>
+                        <td>${item.RoomOwnerName}</td>
+                        <td>${item.Purpose}</td>
+                        <td>
+                            <span class="badge ${getStatusBadgeClass(item.Status)}">
+                                ${item.Status}
+                            </span>
+                        </td>
+                        <td>${item.CheckInTime || 'N/A'}</td>
+                    </tr>
+                `;
+                tbody.append(row);
+            });
+        }
+
+        function getStatusBadgeClass(status) {
+            switch (status.toLowerCase()) {
+                case 'approved': return 'bg-success';
+                case 'pending': return 'bg-warning';
+                case 'declined': return 'bg-danger';
+                case 'checked in': return 'bg-info';
+                case 'checked out': return 'bg-secondary';
+                default: return 'bg-primary';
+            }
+        }
+
+        function updateTrendsChart(data) {
+            const ctx = document.getElementById('visitorTrendsChart').getContext('2d');
+
+            if (trendsChart) {
+                trendsChart.destroy();
+            }
+
+            // Prepare data for the chart
+            const labels = data.map(item => item.Period);
+            const values = data.map(item => item.TotalVisitors);
+
+            trendsChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Visitor Trends',
+                        data: values,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Visitor Trends Over Time'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function updateDistributionChart(data) {
+            const ctx = document.getElementById('statusDistributionChart').getContext('2d');
+
+            if (distributionChart) {
+                distributionChart.destroy();
+            }
+
+            // Calculate status distribution
+            const statusCounts = {
+                'Approved': 0,
+                'Pending': 0,
+                'Declined': 0,
+                'Checked In': 0,
+                'Checked Out': 0
+            };
+
+            data.forEach(item => {
+                const status = item.Status.toLowerCase();
+                if (status.includes('approved')) statusCounts['Approved']++;
+                else if (status.includes('pending')) statusCounts['Pending']++;
+                else if (status.includes('declined')) statusCounts['Declined']++;
+                else if (status.includes('checked in')) statusCounts['Checked In']++;
+                else if (status.includes('checked out')) statusCounts['Checked Out']++;
+            });
+
+            distributionChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts).filter(key => statusCounts[key] > 0),
+                    datasets: [{
+                        data: Object.values(statusCounts).filter(val => val > 0),
+                        backgroundColor: [
+                            '#198754', // Approved - green
+                            '#ffc107', // Pending - yellow
+                            '#dc3545', // Declined - red
+                            '#0dcaf0', // Checked In - info
+                            '#6c757d'  // Checked Out - secondary
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Status Distribution'
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportReport(format) {
+            const dateRange = $('#dateRange').val();
+            const reportType = $('#reportType').val();
+
+            if (!dateRange) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Date Range Required',
+                    text: 'Please select a date range to export reports.'
+                });
+                return;
+            }
+
+            const dates = dateRange.split(' to ');
+            const startDate = dates[0];
+            const endDate = dates[1] || dates[0];
+
+            Swal.fire({
+                title: 'Exporting Report',
+                text: `Preparing ${format.toUpperCase()} export...`,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Create a form to submit the export request
+            const form = document.createElement('form');
+            form.method = 'GET';
+            form.action = '/Reports/ExportVisitorReports';
+
+            const startDateInput = document.createElement('input');
+            startDateInput.type = 'hidden';
+            startDateInput.name = 'startDate';
+            startDateInput.value = startDate;
+            form.appendChild(startDateInput);
+
+            const endDateInput = document.createElement('input');
+            endDateInput.type = 'hidden';
+            endDateInput.name = 'endDate';
+            endDateInput.value = endDate;
+            form.appendChild(endDateInput);
+
+            const reportTypeInput = document.createElement('input');
+            reportTypeInput.type = 'hidden';
+            reportTypeInput.name = 'reportType';
+            reportTypeInput.value = reportType;
+            form.appendChild(reportTypeInput);
+
+            const formatInput = document.createElement('input');
+            formatInput.type = 'hidden';
+            formatInput.name = 'format';
+            formatInput.value = format;
+            form.appendChild(formatInput);
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
+
+            // Close the loading alert after a short delay
+            setTimeout(() => {
+                Swal.close();
+            }, 2000);
+        }
+
+        // Event listeners
+        $('#trendsPeriod').on('change', loadVisitorTrends);
+        $('#reportType').on('change', loadReports);
+    </script>
+}
