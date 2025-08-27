@@ -122,13 +122,11 @@ namespace VisitorManagementSystem_Capstone.Controllers
                 .Where(r => r.OwnerUserId == userId
                     && r.VerificationStatus == null
                     && r.logStatus == true
-                    && r.CreatedBy == "staff" // Only staff-created requests
-                    && (r.Visitor.User.ContactNumber == null ||
-                        r.Visitor.User.ContactNumber == "N/A" ||
-                        string.IsNullOrEmpty(r.Visitor.User.ContactNumber)))
+                    && r.CreatedBy == "staff") // Only staff-created requests
                 .OrderByDescending(v => v.IssueDate)
                 .ThenByDescending(v => v.VisitLogId)
                 .ToListAsync();
+
         }
 
         public async Task<IActionResult> GetPendingAppointments()
